@@ -1,5 +1,3 @@
-module projectsync.com/main
+module app
 
 go 1.22.2
-
-replace projectsync.com/main => ../authentication

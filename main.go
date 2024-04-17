@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-
-	"../auth"
+	// auth "app/authentication"
 )
 
 func main() {
 	fmt.Println("Hello, Main!")
-	auth.Login()
+	// auth.LogIn()
 }
