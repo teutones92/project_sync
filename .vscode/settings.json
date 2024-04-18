@@ -1,5 +1,12 @@
 {
     "cSpell.words": [
-        "signin"
+        "dbname",
+        "exitosamente",
+        "psadmin",
+        "psdb",
+        "psql",
+        "signin",
+        "sslmode",
+        "VARCHAR"
     ]
 }
