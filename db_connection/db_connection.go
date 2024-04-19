@@ -1,13 +1,14 @@
 package db_connection
 
 import (
+	"app/models"
 	"database/sql"
 	"fmt"
 
 	_ "github.com/lib/pq" // Import the PostgreSQL driver (required for database/sql)
 )
 
-func Init() {
+func GetDatabaseConnection() *sql.DB {
 	const (
 		host     = "localhost"
 		port     = 5432
@@ -18,24 +19,29 @@ func Init() {
 	// Create Connection()
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, db_name)
-
-	// Open the connection to the database
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
 
 	// Verify the connection to the database
 	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
+	return db
+}
 
+func Init() {
+	// Get a connection to the database
+	db := GetDatabaseConnection()
 	// Create the tables in the database
 	fmt.Println("The connection to the database was successful.")
 	_CreateTables(db)
+	// Close the database connection
+	defer db.Close()
 }
+
 func _CreateTables(db *sql.DB) {
 	// Define a map containing SQL queries to create the tables
 	createQueries := map[string]string{
@@ -115,6 +121,11 @@ func _CreateTables(db *sql.DB) {
 	fmt.Println("Tables have been created successfully.")
 
 	// Insert data into the user_roles table
+	insertUserRoles(db)
+
+}
+
+func insertUserRoles(db *sql.DB) {
 	fmt.Println("Inserting data into user_roles table...")
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM user_roles").Scan(&count)
@@ -141,5 +152,29 @@ func _CreateTables(db *sql.DB) {
 		}
 		fmt.Println("Data inserted successfully into user_roles table.")
 	}
+}
+
+func CreateUser(user_data models.User, db *sql.DB) (status models.StatusCode) {
+	var count int
+	// er := db.QueryRow("SELECT COUNT(*) FROM users WHERE username = $1 OR email = $2", user_data.Username, user_data.Email).Scan(&count)
+	er := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1", user_data.Email).Scan(&count)
+	if er != nil {
+		panic(fmt.Sprintf("Error checking if user exists: %s", er))
+	}
+
+	// If count is greater than zero, print a message indicating that the user already exists
+	if count > 0 {
+		fmt.Println("User already exists.")
+		return models.StatusCode{StatusCode: 400, StatusCodeMessage: "User already exists."}
+	}
+	// Insert data into the users table
+	_, err := db.Exec(`
+        INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)`,
+		user_data.Username, user_data.Email, user_data.PasswordHash)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error inserting data into users table: %s", err))
+	}
+	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User created."}
 
 }
