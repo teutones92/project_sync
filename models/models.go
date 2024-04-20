@@ -24,6 +24,7 @@ type User struct {
 	Email        string `json:"email"`
 	PasswordHash string `json:"-"`
 	Password     string `json:"password"`
+	UserAvatar   string `json:"user_avatar_path"`
 }
 
 // UserRole represent the structure of a user role
@@ -75,7 +76,9 @@ type Comment struct {
 
 // Session represent the structure of a session
 type Session struct {
-	SessionID           int    `json:"session_id"`
-	UserID              int    `json:"user_id"`
-	ExpirationTimestamp string `json:"expiration_timestamp"`
+	SessionID             int    `json:"session_id"`
+	UserID                int    `json:"user_id"`
+	Token                 string `json:"token"`
+	LastActivityTimestamp string `json:"last_activity_timestamp"`
+	ExpirationMinutes     int    `json:"expiration_minutes"`
 }

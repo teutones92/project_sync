@@ -6,12 +6,15 @@ import (
 	"net/http"
 )
 
+var port = ":8080"
+
 func HandleAuthentication() error {
 	// Auth API
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auth/signup", auth.SignUp)
 	mux.HandleFunc("/auth/login", auth.LogIn)
 	mux.HandleFunc("/auth/logout", auth.LogOut)
-	err := http.ListenAndServe(":8080", mux)
+	mux.HandleFunc("/auth/delete_account", auth.DeleteAccount)
+	err := http.ListenAndServe(port, mux)
 	return err
 }

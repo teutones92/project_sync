@@ -1,14 +1,16 @@
 package db_connection
 
 import (
-	"app/models"
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq" // Import the PostgreSQL driver (required for database/sql)
 )
 
-func GetDatabaseConnection() *sql.DB {
+var database *sql.DB
+
+func GetDatabase() *sql.DB {
 	const (
 		host     = "localhost"
 		port     = 5432
@@ -34,15 +36,15 @@ func GetDatabaseConnection() *sql.DB {
 
 func Init() {
 	// Get a connection to the database
-	db := GetDatabaseConnection()
+	database = GetDatabase()
 	// Create the tables in the database
-	fmt.Println("The connection to the database was successful.")
-	_CreateTables(db)
+	log.Println("The connection to the database was successful.")
+	_CreateTables()
 	// Close the database connection
-	defer db.Close()
+	defer database.Close()
 }
 
-func _CreateTables(db *sql.DB) {
+func _CreateTables() {
 	// Define a map containing SQL queries to create the tables
 	createQueries := map[string]string{
 		"users": `
@@ -50,7 +52,8 @@ func _CreateTables(db *sql.DB) {
                 user_id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
-                password_hash VARCHAR(100) NOT NULL
+                password_hash VARCHAR(100) NOT NULL,
+				user_avatar_path TEXT DEFAULT ''
             );`,
 		"user_roles": `
             CREATE TABLE IF NOT EXISTS user_roles (
@@ -106,27 +109,29 @@ func _CreateTables(db *sql.DB) {
             CREATE TABLE IF NOT EXISTS sessions (
                 session_id SERIAL PRIMARY KEY,
                 user_id INT,
-                expiration_timestamp TIMESTAMP,
+				token VARCHAR(100) UNIQUE,
+                last_activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    			expiration_minutes INT DEFAULT 30,
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
             );`,
 	}
 
 	// Iterate over the map and execute each SQL query
 	for tableName, query := range createQueries {
-		_, err := db.Exec(query)
+		_, err := database.Exec(query)
 		if err != nil {
 			panic(fmt.Sprintf("Error creating table %s: %s", tableName, err))
 		}
 	}
-	fmt.Println("Tables have been created successfully.")
+	log.Println("Tables have been created successfully.")
 
 	// Insert data into the user_roles table
-	insertUserRoles(db)
+	insertUserRoles(database)
 
 }
 
 func insertUserRoles(db *sql.DB) {
-	fmt.Println("Inserting data into user_roles table...")
+	log.Println("Inserting data into user_roles table...")
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM user_roles").Scan(&count)
 	if err != nil {
@@ -134,7 +139,7 @@ func insertUserRoles(db *sql.DB) {
 	}
 	// If count is greater than zero, print a message indicating that the data already exists in the user_roles table
 	if count > 0 {
-		fmt.Println("Data already exists in user_roles table. Skipping insertion.")
+		log.Println("Data already exists in user_roles table. Skipping insertion.")
 	} else {
 		// If the count is zero, insert the data into the user_roles table
 		_, err := db.Exec(`
@@ -150,31 +155,6 @@ func insertUserRoles(db *sql.DB) {
 		if err != nil {
 			panic(fmt.Sprintf("Error inserting data into user_roles table: %s", err))
 		}
-		fmt.Println("Data inserted successfully into user_roles table.")
+		log.Println("Data inserted successfully into user_roles table.")
 	}
-}
-
-func CreateUser(user_data models.User, db *sql.DB) (status models.StatusCode) {
-	var count int
-	// er := db.QueryRow("SELECT COUNT(*) FROM users WHERE username = $1 OR email = $2", user_data.Username, user_data.Email).Scan(&count)
-	er := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1", user_data.Email).Scan(&count)
-	if er != nil {
-		panic(fmt.Sprintf("Error checking if user exists: %s", er))
-	}
-
-	// If count is greater than zero, print a message indicating that the user already exists
-	if count > 0 {
-		fmt.Println("User already exists.")
-		return models.StatusCode{StatusCode: 400, StatusCodeMessage: "User already exists."}
-	}
-	// Insert data into the users table
-	_, err := db.Exec(`
-        INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)`,
-		user_data.Username, user_data.Email, user_data.PasswordHash)
-
-	if err != nil {
-		panic(fmt.Sprintf("Error inserting data into users table: %s", err))
-	}
-	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User created."}
-
 }
