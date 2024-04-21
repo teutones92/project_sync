@@ -10,17 +10,23 @@ import (
 
 var database *sql.DB
 
+const (
+	// Host and port to connect to the PostgreSQL server
+	postgresqlHost = "localhost"
+	postgresqlPort = 5432
+	// Username and password to connect to the PostgreSQL server
+	serverUserName = "postgres"
+	serverPassword = "rfv/789*-+"
+	// Username and password to connect to the database
+	user     = "psadmin"
+	password = "Calibre92*"
+	db_name  = "psdb"
+)
+
 func GetDatabase() *sql.DB {
-	const (
-		host     = "localhost"
-		port     = 5432
-		user     = "psadmin"
-		password = "Calibre92*"
-		db_name  = "psdb"
-	)
 	// Create Connection()
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, db_name)
+		postgresqlHost, postgresqlPort, user, password, db_name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -34,12 +40,93 @@ func GetDatabase() *sql.DB {
 	return db
 }
 
+// Function to create a database in postgresql server if it does not exist
+func _CreateDataBaseIfNotExists() bool {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", postgresqlHost, postgresqlPort, serverUserName, serverPassword)
+	// Connect to PostgreSQL server
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Printf("Error opening database connection: %s", err)
+		return false
+	}
+	defer db.Close()
+
+	// Check if the database already exists
+	var dbExists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = 'psdb')").Scan(&dbExists)
+	if err != nil {
+		log.Printf("Error checking if database exists: %s", err)
+		return false
+	}
+
+	// If the database does not exist, create it
+	if !dbExists {
+		_, err := db.Exec("CREATE DATABASE psdb")
+		if err != nil {
+			log.Printf("Error creating database: %s", err)
+			return false
+		}
+		log.Println("Database created successfully.")
+	} else {
+		log.Println("Database already exists.")
+	}
+	return true
+}
+
+// Function to create a user and password in postgresql server if they do not exist
+func _CreateUserAndPasswordIfNotExists() bool {
+	var username string = "postgres"
+	var password string = "rfv/789*-+"
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", postgresqlHost, postgresqlPort, username, password)
+	// Connect to PostgreSQL server
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Printf("Error opening database connection: %s", err)
+		return false
+	}
+	defer db.Close()
+
+	// Check if the user already exists
+	var userExists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = 'psadmin')").Scan(&userExists)
+	if err != nil {
+		log.Printf("Error checking if user exists: %s", err)
+		return false
+	}
+
+	// If the user does not exist, create it
+	if !userExists {
+		_, err := db.Exec("CREATE ROLE psadmin WITH LOGIN PASSWORD 'Calibre92*' SUPERUSER CREATEDB CREATEROLE;")
+		if err != nil {
+			log.Printf("Error creating user: %s", err)
+			return false
+		}
+		log.Println("User created successfully.")
+	} else {
+		log.Println("User already exists.")
+	}
+	return true
+}
+
 func Init() {
-	// Get a connection to the database
+	// Create channels for synchronization
+	var dbCreated bool
+	var userCreated bool
+	// dbCreated := make(chan bool)
+	// userCreated := make(chan bool)
+	// databaseConnected := make(chan bool)
+	// Create the database if it does not exist (goroutine)
+	respDb := _CreateDataBaseIfNotExists()
+	dbCreated = respDb
+	// Create a user and password if they do not exist (goroutine)
+	respUser := _CreateUserAndPasswordIfNotExists()
+	userCreated = respUser
+	// Database connection
 	database = GetDatabase()
-	// Create the tables in the database
-	log.Println("The connection to the database was successful.")
-	_CreateTables()
+	// Create tables in the database
+	if dbCreated && userCreated {
+		_CreateTables()
+	}
 	// Close the database connection
 	defer database.Close()
 }
@@ -68,7 +155,8 @@ func _CreateTables() {
                 description TEXT,
                 start_date DATE,
                 end_date DATE,
-                project_lead_id INT
+                project_lead_id INT,
+				image_path TEXT
             );`,
 		"tasks": `
             CREATE TABLE IF NOT EXISTS tasks (
@@ -80,6 +168,7 @@ func _CreateTables() {
                 priority VARCHAR(20),
                 assigned_user INT,
                 deadline DATE,
+				image_path TEXT[],
                 FOREIGN KEY (project_id) REFERENCES projects(project_id),
                 FOREIGN KEY (assigned_user) REFERENCES users(user_id)
             );`,
@@ -115,19 +204,30 @@ func _CreateTables() {
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
             );`,
 	}
-
+	tableOrder := []string{"users", "user_roles", "projects", "tasks", "team_members", "comments", "sessions"}
 	// Iterate over the map and execute each SQL query
-	for tableName, query := range createQueries {
-		_, err := database.Exec(query)
-		if err != nil {
-			panic(fmt.Sprintf("Error creating table %s: %s", tableName, err))
+	tableCreated := make(chan bool)
+	go func() {
+		for _, tableName := range tableOrder {
+			query, ok := createQueries[tableName]
+			if !ok {
+				log.Printf("Table %s not found in createQueries", tableName)
+				continue
+			}
+			_, err := database.Exec(query)
+			if err != nil {
+				// panic(fmt.Sprintf("Error creating table %s: %s", tableName, err))
+				log.Printf("Error creating table %s: %s", tableName, err)
+			}
+			log.Printf("Table %s has been created successfully.", tableName)
 		}
-	}
-	log.Println("Tables have been created successfully.")
-
+		tableCreated <- true
+	}()
+	log.Println("waiting for table creation...")
+	<-tableCreated
+	// log.Println("Tables have been created successfully.")
 	// Insert data into the user_roles table
 	insertUserRoles(database)
-
 }
 
 func insertUserRoles(db *sql.DB) {
@@ -153,8 +253,8 @@ func insertUserRoles(db *sql.DB) {
         ('Junior Developer', 'Entry-level developer learning and contributing to development tasks.'),
         ('Guest', 'Limited access user with read-only permissions.')`)
 		if err != nil {
-			panic(fmt.Sprintf("Error inserting data into user_roles table: %s", err))
+			log.Printf("Error inserting role information into user_roles table: %s", err)
 		}
-		log.Println("Data inserted successfully into user_roles table.")
+		log.Println("Information has been inserted into the user_roles table.")
 	}
 }

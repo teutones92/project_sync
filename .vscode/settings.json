@@ -1,11 +1,15 @@
 {
     "cSpell.words": [
+        "CREATEDB",
+        "CREATEROLE",
+        "datname",
         "dbname",
         "dgrijalva",
         "exitosamente",
         "psadmin",
         "psdb",
         "psql",
+        "rolname",
         "signin",
         "signup",
         "sslmode",

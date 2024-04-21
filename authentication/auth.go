@@ -2,8 +2,8 @@ package auth
 
 import (
 	"app/db_connection"
-	"app/db_connection/session_crud"
-	"app/db_connection/user_crud"
+	"app/db_connection/tables/session_crud"
+	"app/db_connection/tables/user_crud"
 	"app/models"
 	"encoding/json"
 	"errors"
@@ -153,6 +153,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	// Return the JWT token to the client
 	session = session_crud.ReadSession(token)
 	json.NewEncoder(w).Encode(session)
+	log.Printf("User %s logged in successfully", user.Username)
 }
 
 // ** [LogOut] is a function that handles the log out process
@@ -182,6 +183,7 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 	status := session_crud.DeleteSession(token)
 	// Return a response to the client indicating that the user has been logged out
 	json.NewEncoder(w).Encode(status)
+	log.Println("User logged out successfully")
 }
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -201,19 +203,25 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		// http.Error(w, "Token is required", http.StatusBadRequest)
-		status_code := models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Token is required"}
+		status_code := models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Token is required in the header"}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println("Token is required")
 		return
 	}
 	// Get the session data from the database
 	session := session_crud.ReadSession(token)
-	// Delete the user from the database
-	status := user_crud.DeleteUser(session.UserID)
-	// Delete the session from the database
-	session_crud.DeleteSession(token)
-	// Return a response to the client indicating that the user has been deleted
-	json.NewEncoder(w).Encode(status)
+	if session.SessionID > 0 {
+		// Delete the session from the database
+		session_crud.DeleteSession(token)
+		// Delete the user from the database
+		status := user_crud.DeleteUser(session.UserID)
+		// Return a response to the client indicating that the user has been deleted
+		json.NewEncoder(w).Encode(status)
+		log.Println("User deleted successfully")
+		return
+	}
+	json.NewEncoder(w).Encode(models.StatusCode{StatusCode: http.StatusUnauthorized, StatusCodeMessage: "Invalid token provided"})
+	log.Println("Invalid token provided")
 }
 
 // Local function to check if the user credentials are valid

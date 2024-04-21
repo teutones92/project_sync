@@ -42,6 +42,7 @@ type Project struct {
 	StartDate     string `json:"start_date"`
 	EndDate       string `json:"end_date"`
 	ProjectLeadID int    `json:"project_lead_id"`
+	ImagePath     string `json:"image_path"`
 }
 
 // Task represent the structure of a task
