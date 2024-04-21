@@ -179,8 +179,8 @@ func _CreateTables() {
                 user_id INT,
                 role_id INT,
                 FOREIGN KEY (project_id) REFERENCES projects(project_id),
-                FOREIGN KEY (user_id) REFERENCES users(user_id),
-                FOREIGN KEY (role_id) REFERENCES user_roles(role_id)
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+               -- FOREIGN KEY (role_id) REFERENCES user_roles(role_id)
             );`,
 		"comments": `
             CREATE TABLE IF NOT EXISTS comments (

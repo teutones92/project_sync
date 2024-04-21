@@ -5,6 +5,7 @@ import (
 	"app/db_connection/tables/session_crud"
 	"app/db_connection/tables/user_crud"
 	"app/models"
+	"app/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,32 +15,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
-
-func setHeader(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-}
-
-func checkHeader(w http.ResponseWriter, r *http.Request) bool {
-	if r.Header.Get("Content-Type") != "application/json" {
-		// http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
-		res := models.StatusCode{StatusCode: http.StatusUnsupportedMediaType, StatusCodeMessage: "Content-Type must be application/json"}
-		json.NewEncoder(w).Encode(res)
-		log.Println("Content-Type must be application/json")
-		return false
-	}
-	return true
-}
-
-func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
-	if r.Method != method {
-		// http.Error(w, "Method not allowed asd", http.StatusMethodNotAllowed)
-		var status_code = models.StatusCode{StatusCode: http.StatusMethodNotAllowed, StatusCodeMessage: "Method not allowed"}
-		json.NewEncoder(w).Encode(status_code)
-		log.Println("Method not allowed")
-		return false
-	}
-	return true
-}
 
 func validate(u models.User, from_login bool) error {
 	if u.Username == "" && !from_login {
@@ -58,11 +33,11 @@ func validate(u models.User, from_login bool) error {
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	var status_code models.StatusCode
 	// Set the response header
-	setHeader(w)
+	utils.SetHeader(w)
 	// Check the request method
-	checkMethod(w, r, "POST")
+	utils.CheckMethod(w, r, "POST")
 	// Check the header
-	checkHeader(w, r)
+	utils.CheckHeader(w, r)
 	var req models.User
 	// Parse the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -102,11 +77,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 func LogIn(w http.ResponseWriter, r *http.Request) {
 	var status_code models.StatusCode
 	// Set the response header
-	setHeader(w)
+	utils.SetHeader(w)
 	// Check the request method
-	checkMethod(w, r, "POST")
+	utils.CheckMethod(w, r, "POST")
 	// Check the header
-	checkHeader(w, r)
+	utils.CheckHeader(w, r)
 	var req models.User
 
 	// Parse the request body
@@ -159,14 +134,14 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 // ** [LogOut] is a function that handles the log out process
 func LogOut(w http.ResponseWriter, r *http.Request) {
 	// Set the response header
-	setHeader(w)
+	utils.SetHeader(w)
 	// Check the request method
-	method := checkMethod(w, r, "POST")
+	method := utils.CheckMethod(w, r, "POST")
 	if !method {
 		return
 	}
 	// Check the header
-	header := checkHeader(w, r)
+	header := utils.CheckHeader(w, r)
 	if !header {
 		return
 	}
@@ -188,14 +163,14 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Set the response header
-	setHeader(w)
+	utils.SetHeader(w)
 	// Check the request method
-	method := checkMethod(w, r, "DELETE")
+	method := utils.CheckMethod(w, r, "DELETE")
 	if !method {
 		return
 	}
 	// Check the header
-	header := checkHeader(w, r)
+	header := utils.CheckHeader(w, r)
 	if !header {
 		return
 	}

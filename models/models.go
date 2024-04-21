@@ -17,6 +17,11 @@ type StatusCode struct {
 	StatusCodeMessage string `json:"status_code_name"`
 }
 
+// Error implements error.
+func (s StatusCode) Error() string {
+	panic("unimplemented")
+}
+
 // User represent the structure of a user
 type User struct {
 	UserID       int    `json:"user_id"`
