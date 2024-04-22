@@ -23,14 +23,14 @@ func CreateSession(session models.Session) models.StatusCode {
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Session created."}
 }
 
-func ReadSession(token string) models.Session {
+func ReadSession(token string) (models.Session, error) {
 	db := db_connection.GetDatabase()
 	var session models.Session
 	// Query the database to get the session data
 	er := db.QueryRow("SELECT session_id, user_id, token, last_activity_timestamp, expiration_minutes"+
 		" FROM sessions WHERE token = $1",
 		token).Scan(
-		&session.SessionID,
+		&session.ID,
 		&session.UserID,
 		&session.Token,
 		&session.LastActivityTimestamp,
@@ -39,10 +39,10 @@ func ReadSession(token string) models.Session {
 	if er != nil {
 		log.Printf("Error reading session data: %s", er)
 		db.Close()
-		return models.Session{SessionID: 0}
+		return session, er
 	}
 	db.Close()
-	return session
+	return session, nil
 }
 
 func UpdateSession(session models.Session) models.StatusCode {

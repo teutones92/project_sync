@@ -108,7 +108,7 @@ func _CreateUserAndPasswordIfNotExists() bool {
 	return true
 }
 
-func Init() {
+func Init() error {
 	// Create channels for synchronization
 	var dbCreated bool
 	var userCreated bool
@@ -125,32 +125,37 @@ func Init() {
 	database = GetDatabase()
 	// Create tables in the database
 	if dbCreated && userCreated {
-		_CreateTables()
+		terror := _CreateTables()
+		if terror != nil {
+			return terror
+		}
 	}
 	// Close the database connection
 	defer database.Close()
+	return nil
 }
 
-func _CreateTables() {
+func _CreateTables() error {
 	// Define a map containing SQL queries to create the tables
 	createQueries := map[string]string{
 		"users": `
             CREATE TABLE IF NOT EXISTS users (
-                user_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
                 password_hash VARCHAR(100) NOT NULL,
-				user_avatar_path TEXT DEFAULT ''
+				user_avatar_path TEXT
+				-- user_avatar_path TEXT DEFAULT ''
             );`,
 		"user_roles": `
             CREATE TABLE IF NOT EXISTS user_roles (
-                role_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 role_name VARCHAR(50) NOT NULL UNIQUE,
                 role_description TEXT
             );`,
 		"projects": `
             CREATE TABLE IF NOT EXISTS projects (
-                project_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 project_name VARCHAR(100) NOT NULL,
                 description TEXT,
                 start_date DATE,
@@ -158,76 +163,110 @@ func _CreateTables() {
                 project_lead_id INT,
 				image_path TEXT
             );`,
+		"task_status": `
+            CREATE TABLE IF NOT EXISTS task_status (
+                id SERIAL PRIMARY KEY,
+				project_id INT,
+                user_id INT,
+                status_name TEXT,
+                status_description TEXT,
+                FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );`,
 		"tasks": `
             CREATE TABLE IF NOT EXISTS tasks (
-                task_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 project_id INT,
                 task_name VARCHAR(100) NOT NULL,
                 description TEXT,
-                status VARCHAR(20),
+                status_id INT,
                 priority VARCHAR(20),
                 assigned_user INT,
                 deadline DATE,
 				image_path TEXT[],
-                FOREIGN KEY (project_id) REFERENCES projects(project_id),
-                FOREIGN KEY (assigned_user) REFERENCES users(user_id)
+                FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (assigned_user) REFERENCES users(id),
+                FOREIGN KEY (status_id) REFERENCES task_status(id)
             );`,
 		"team_members": `
             CREATE TABLE IF NOT EXISTS team_members (
-                team_member_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 project_id INT,
                 user_id INT,
                 role_id INT,
-                FOREIGN KEY (project_id) REFERENCES projects(project_id),
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
-               -- FOREIGN KEY (role_id) REFERENCES user_roles(role_id)
+                FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+               -- FOREIGN KEY (role_id) REFERENCES user_roles(id)
             );`,
 		"comments": `
             CREATE TABLE IF NOT EXISTS comments (
-                comment_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 project_id INT,
                 task_id INT,
                 user_id INT,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 comment_text TEXT,
-                FOREIGN KEY (project_id) REFERENCES projects(project_id),
-                FOREIGN KEY (task_id) REFERENCES tasks(task_id),
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
+                FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (task_id) REFERENCES tasks(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
             );`,
 		"sessions": `
             CREATE TABLE IF NOT EXISTS sessions (
-                session_id SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 user_id INT,
 				token VARCHAR(100) UNIQUE,
                 last_activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     			expiration_minutes INT DEFAULT 30,
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
+                FOREIGN KEY (user_id) REFERENCES users(id)
             );`,
+		"user_contacts": `
+			CREATE TABLE IF NOT EXISTS user_contacts (
+				id SERIAL PRIMARY KEY,
+				user_id INT,
+				contact_name VARCHAR(100) NOT NULL,
+				contact_email VARCHAR(100) NOT NULL,
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);`,
 	}
-	tableOrder := []string{"users", "user_roles", "projects", "tasks", "team_members", "comments", "sessions"}
+	tableOrder := []string{"users", "user_roles", "projects", "task_status", "tasks", "team_members", "comments", "sessions", "user_contacts"}
 	// Iterate over the map and execute each SQL query
-	tableCreated := make(chan bool)
-	go func() {
-		for _, tableName := range tableOrder {
-			query, ok := createQueries[tableName]
-			if !ok {
-				log.Printf("Table %s not found in createQueries", tableName)
-				continue
-			}
-			_, err := database.Exec(query)
-			if err != nil {
-				// panic(fmt.Sprintf("Error creating table %s: %s", tableName, err))
-				log.Printf("Error creating table %s: %s", tableName, err)
-			}
-			log.Printf("Table %s has been created successfully.", tableName)
-		}
-		tableCreated <- true
-	}()
+	done := make(chan bool)
 	log.Println("waiting for table creation...")
-	<-tableCreated
-	// log.Println("Tables have been created successfully.")
+	for _, tableName := range tableOrder {
+		_TableExists(tableName, database)
+		query, ok := createQueries[tableName]
+		go func(tName string, tQuery string) {
+			_, err := database.Exec(tQuery)
+			if !ok {
+				log.Printf("Table %s not found in createQueries", tName)
+			}
+			if err != nil {
+				log.Fatalf("Error creating table %s: %s", tName, err)
+				return
+			}
+			done <- true
+		}(tableName, query)
+		<-done
+		// log.Printf("Table %s has been created successfully.", tableName)
+	}
+	log.Println("Tables have been created successfully.")
 	// Insert data into the user_roles table
 	insertUserRoles(database)
+	return nil
+}
+
+func _TableExists(tableName string, db *sql.DB) {
+	var exists string
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '%s')", tableName)
+	err := db.QueryRow(query).Scan(&exists)
+	if err != nil {
+		panic(fmt.Sprintf("Error checking if table exists: %s", err))
+	}
+	if exists == "true" {
+		log.Printf("Using %s table.", tableName)
+	} else {
+		log.Printf("Table %s has been created successfully.", tableName)
+	}
 }
 
 func insertUserRoles(db *sql.DB) {
@@ -257,4 +296,31 @@ func insertUserRoles(db *sql.DB) {
 		}
 		log.Println("Information has been inserted into the user_roles table.")
 	}
+}
+
+func InsertTaskStatus(db *sql.DB, projectID int, userID int) {
+	log.Println("Inserting data into task_status table...")
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM task_status").Scan(&count)
+	if err != nil {
+		panic(fmt.Sprintf("Error counting rows in task_status table: %s", err))
+	}
+	// If count is greater than zero, print a message indicating that the data already exists in the task_status table
+	if count > 0 {
+		log.Println("Data already exists in task_status table. Skipping insertion.")
+		db.Close()
+		return
+	}
+	// If the count is zero, insert the data into the task_status table
+	_, er := db.Exec(`
+		INSERT INTO task_status (status_name, status_description, project_id, user_id) VALUES
+		('To Do', 'Task has not been started yet.'),
+		('In Progress', 'Task is currently being worked on.'),
+		('In Review', 'Task is being reviewed by the project manager or team lead.'),
+		('Done', 'Task has been completed and delivered.', $1, $2)`, projectID, userID)
+	if er != nil {
+		log.Printf("Error inserting status information into task_status table: %s", err)
+	}
+	log.Println("Information has been inserted into the task_status table.")
+
 }

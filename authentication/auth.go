@@ -35,9 +35,20 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	// Set the response header
 	utils.SetHeader(w)
 	// Check the request method
-	utils.CheckMethod(w, r, "POST")
+	method := utils.CheckMethod(w, r, "POST")
+	if !method {
+		return
+	}
 	// Check the header
-	utils.CheckHeader(w, r)
+	header := utils.CheckHeader(w, r)
+	if !header {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
 	var req models.User
 	// Parse the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -79,11 +90,21 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	// Set the response header
 	utils.SetHeader(w)
 	// Check the request method
-	utils.CheckMethod(w, r, "POST")
+	method := utils.CheckMethod(w, r, "POST")
+	if !method {
+		return
+	}
 	// Check the header
-	utils.CheckHeader(w, r)
+	header := utils.CheckHeader(w, r)
+	if !header {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
 	var req models.User
-
 	// Parse the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -109,11 +130,10 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		log.Println("Invalid credentials")
 		return
 	}
-
 	// Get the user data from the database
-	user := user_crud.ReadUser(userID)
+	user := user_crud.ReadUserByID(userID)
 	// Generate a JWT token
-	token, err := generateJWT(user)
+	token, err := generateJWT(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()})
@@ -126,7 +146,13 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	// Save the session in the database
 	session_crud.CreateSession(session)
 	// Return the JWT token to the client
-	session = session_crud.ReadSession(token)
+	session_data, err := session_crud.ReadSession(token)
+	if err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusUnauthorized, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		return
+	}
+	session = session_data
 	json.NewEncoder(w).Encode(session)
 	log.Printf("User %s logged in successfully", user.Username)
 }
@@ -146,6 +172,9 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the token from the request header
+	if !utils.VerifyToken(w, r) {
+		return
+	}
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		// http.Error(w, "Token is required", http.StatusBadRequest)
@@ -174,18 +203,22 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	if !header {
 		return
 	}
-	// Get the token from the request header
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		// http.Error(w, "Token is required", http.StatusBadRequest)
-		status_code := models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Token is required in the header"}
-		json.NewEncoder(w).Encode(status_code)
-		log.Println("Token is required")
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
 		return
 	}
+	// Get the token from the request header
+	token := r.Header.Get("Authorization")
 	// Get the session data from the database
-	session := session_crud.ReadSession(token)
-	if session.SessionID > 0 {
+	session, err := session_crud.ReadSession(token)
+	if err != nil {
+		status_code := models.StatusCode{StatusCode: http.StatusUnauthorized, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err.Error())
+		return
+	}
+	if session.ID > 0 {
 		// Delete the session from the database
 		session_crud.DeleteSession(token)
 		// Delete the user from the database
@@ -245,13 +278,13 @@ func hasGenerator(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func generateJWT(user models.User) (string, error) {
+func generateJWT(userID int) (string, error) {
 	// Create a new token object
 	token := jwt.New(jwt.SigningMethodHS256)
 	// Create a new claim
 	claims := token.Claims.(jwt.MapClaims)
 	// Set the claim
-	claims["user_id"] = user.UserID
+	claims["user_id"] = userID
 	// Generate the token
 	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
@@ -259,4 +292,54 @@ func generateJWT(user models.User) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+// to do later
+func SendEmailValidation(w http.ResponseWriter, r *http.Request) {
+	// Set the response header
+	utils.SetHeader(w)
+	// Check the request method
+	method := utils.CheckMethod(w, r, "POST")
+	if !method {
+		return
+	}
+	// Check the header
+	header := utils.CheckHeader(w, r)
+	if !header {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
+	// Get the token from the request header
+	token := r.Header.Get("Authorization")
+	// Get the session data from the database
+	session, err := session_crud.ReadSession(token)
+	if err != nil {
+		status_code := models.StatusCode{StatusCode: http.StatusUnauthorized, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err.Error())
+		return
+	}
+	if session.ID > 0 {
+		// Decode the request body into a user struct
+		var user models.User
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			status_code := models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: err.Error()}
+			json.NewEncoder(w).Encode(status_code)
+			log.Println(err)
+			return
+		}
+		// Get the user data from the database
+		// user_data := user_crud.ReadUserByID(session.UserID)
+		// Send the email validation link to the user's email address
+		// email.SendEmailValidationLink(user_data.Email)
+		// Return a response to the client indicating that the email validation link has been sent
+		status_code := models.StatusCode{StatusCode: http.StatusOK, StatusCodeMessage: "Email validation link sent"}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println("Email validation link sent")
+	}
 }

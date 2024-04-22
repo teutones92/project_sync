@@ -2,6 +2,9 @@ package project_crud
 
 import (
 	"app/db_connection"
+	"app/db_connection/tables/task_crud"
+	"app/db_connection/tables/task_status_crud"
+	"app/db_connection/tables/user_crud"
 	"app/models"
 	"app/utils"
 	"encoding/json"
@@ -35,11 +38,14 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	if !utils.CheckMethod(w, r, "POST") {
 		return
 	}
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
 	// Decode the request body into a project struct
 	var project models.Project
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
-		// http.Error(w, err.Error(), http.StatusBadRequest)
 		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
@@ -71,16 +77,25 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		return
 	}
+	// Read User by ID
+	user_crud.ReadUserByID(project.ProjectLeadID)
+	// Create a task status for the project and User Id
+	task_status_crud.DeleteTaskStatusByProjectID(project.ProjectLeadID)
 	status_code = models.StatusCode{StatusCode: http.StatusCreated, StatusCodeMessage: "Project created successfully"}
 	json.NewEncoder(w).Encode(status_code)
 }
 
+// Function to read all projects from the database
 func ReadProjects(w http.ResponseWriter, r *http.Request) {
 	var status_code models.StatusCode
 	// Set the response header
 	utils.SetHeader(w)
 	// Check if the request method is GET
 	if !utils.CheckMethod(w, r, "GET") {
+		return
+	}
+	verify := utils.VerifyToken(w, r)
+	if !verify {
 		return
 	}
 	// Read the project from the database
@@ -98,7 +113,143 @@ func ReadProjects(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var project models.Project
 		err := rows.Scan(
-			&project.ProjectID,
+			&project.ID,
+			&project.ProjectName,
+			&project.Description,
+			&project.StartDate,
+			&project.EndDate,
+			&project.ProjectLeadID,
+			&project.ImagePath)
+		if err != nil {
+			status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
+			json.NewEncoder(w).Encode(status_code)
+			log.Println(err)
+			db.Close()
+			return
+		}
+		projects = append(projects, project)
+	}
+	json.NewEncoder(w).Encode(projects)
+	db.Close()
+}
+
+// Function to read a project by ID from the database
+func ReadProjectByID(w http.ResponseWriter, r *http.Request) {
+	var status_code models.StatusCode
+	// Set the response header
+	// Set the response header
+	utils.SetHeader(w)
+	// Check the request method
+	method := utils.CheckMethod(w, r, "GET")
+	if !method {
+		return
+	}
+	// Check the header
+	header := utils.CheckHeader(w, r)
+	if !header {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
+	// Get the project ID from the URL
+	projectID := models.Project{}.ID
+	err := json.NewDecoder(r.Body).Decode(&projectID)
+	if err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err)
+		return
+	}
+	if projectID == 0 {
+		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Project ID is required"}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println("Project ID is required")
+		return
+	}
+	// Read the project from the database
+	db := db_connection.GetDatabase()
+	rows, err := db.Query("SELECT * FROM projects WHERE project_id=$1", projectID)
+	if err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err)
+		db.Close()
+		return
+	}
+	defer rows.Close()
+	var project models.Project
+	for rows.Next() {
+		err := rows.Scan(
+			&project.ID,
+			&project.ProjectName,
+			&project.Description,
+			&project.StartDate,
+			&project.EndDate,
+			&project.ProjectLeadID,
+			&project.ImagePath)
+		if err != nil {
+			status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
+			json.NewEncoder(w).Encode(status_code)
+			log.Println(err)
+			db.Close()
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(project)
+	db.Close()
+}
+
+// Function to read a project by project lead ID from the database
+//
+//	Parameters: project_lead_id as Json in the request body
+func ReadProjectByProjectLeadID(w http.ResponseWriter, r *http.Request) {
+	var status_code models.StatusCode
+	// Set the response header
+	utils.SetHeader(w)
+	// Check if the request method is GET
+	if !utils.CheckMethod(w, r, "GET") {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
+	// Get the project lead ID from the URL
+	projectLeadID := models.Project{}.ProjectLeadID
+	err := json.NewDecoder(r.Body).Decode(&projectLeadID)
+	if err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err)
+		return
+	}
+	// Check if the project lead ID is empty
+	if projectLeadID == 0 {
+		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Project lead ID is required"}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println("Project lead ID is required")
+		return
+	}
+	// Read the project from the database
+	db := db_connection.GetDatabase()
+	rows, err := db.Query("SELECT * FROM projects WHERE project_lead_id=$1", projectLeadID)
+	if err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		log.Println(err)
+		db.Close()
+		return
+	}
+	defer rows.Close()
+	var projects []models.Project
+	for rows.Next() {
+		var project models.Project
+		err := rows.Scan(
+			&project.ID,
 			&project.ProjectName,
 			&project.Description,
 			&project.StartDate,
@@ -130,6 +281,11 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 	if !utils.CheckMethod(w, r, "PUT") {
 		return
 	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
+		return
+	}
 	// Decode the request body into a project struct
 	var project models.Project
 	err := json.NewDecoder(r.Body).Decode(&project)
@@ -158,7 +314,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		project.EndDate,
 		project.ProjectLeadID,
 		project.ImagePath,
-		project.ProjectID)
+		project.ID)
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
@@ -173,9 +329,21 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	var status_code models.StatusCode
 	// Set the response header
+	// Set the response header
 	utils.SetHeader(w)
-	// Check if the request method is DELETE
-	if !utils.CheckMethod(w, r, "DELETE") {
+	// Check the request method
+	method := utils.CheckMethod(w, r, "DELETE")
+	if !method {
+		return
+	}
+	// Check the header
+	header := utils.CheckHeader(w, r)
+	if !header {
+		return
+	}
+	// Verify the token
+	verify := utils.VerifyToken(w, r)
+	if !verify {
 		return
 	}
 	// Get the project ID from the URL
@@ -187,7 +355,7 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 		log.Println(e)
 		return
 	}
-	if project.ProjectID == 0 {
+	if project.ID == 0 {
 		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Project ID is required"}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println("Project ID is required")
@@ -195,7 +363,7 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	}
 	// Delete the project from the database
 	db := db_connection.GetDatabase()
-	_, err := db.Exec("DELETE FROM projects WHERE project_id=$1", project.ProjectID)
+	_, err := db.Exec("DELETE FROM projects WHERE project_id=$1", project.ID)
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
@@ -203,6 +371,8 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		return
 	}
+	task_crud.DeleteTaskByProjectID(project.ID)
+	task_status_crud.DeleteTaskStatusByProjectID(project.ID)
 	status_code = models.StatusCode{StatusCode: http.StatusOK, StatusCodeMessage: "Project deleted successfully"}
 	json.NewEncoder(w).Encode(status_code)
 }
