@@ -9,9 +9,9 @@ import (
 func main() {
 	log.Println("Hello, Welcome to Project Sync!")
 	// Start the database connection
-	dbe := db_connection.Init()
-	if dbe != nil {
-		panic(dbe)
+	err := db_connection.Init()
+	if err != nil {
+		panic(err)
 	}
 	// Start the Auth API
 	e := apis.StartServer()
