@@ -4,13 +4,14 @@ import (
 	"app/db_connection/tables/session_crud"
 	"app/models"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
 
 func SetHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Authorization", "")
+	// w.Header().Set("Authorization", "")
 }
 
 func CheckHeader(w http.ResponseWriter, r *http.Request) bool {
@@ -57,4 +58,20 @@ func VerifyToken(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+func Validate(u models.User, from_login bool) error {
+	if u.Username == "" && !from_login {
+		return errors.New("username is required")
+	}
+	if u.Email == "" {
+		return errors.New("email is required")
+	}
+	if u.Password == "" {
+		return errors.New("password is required")
+	}
+	if u.DarkMode == nil && !from_login {
+		return errors.New("dark mode is required as boolean")
+	}
+	return nil
 }

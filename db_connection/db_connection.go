@@ -101,9 +101,9 @@ func _CreateUserAndPasswordIfNotExists() bool {
 			log.Printf("Error creating user: %s", err)
 			return false
 		}
-		log.Println("User created successfully.")
+		log.Println("Admin User created successfully.")
 	} else {
-		log.Println("User already exists.")
+		log.Println("Admin User already exists.")
 	}
 	return true
 }
@@ -143,9 +143,14 @@ func _CreateTables() error {
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
+				dob DATE NOT NULL DEFAULT '1900-01-01',
+				phone_number VARCHAR(20) NOT NULL DEFAULT '',
+				country_code VARCHAR(10) NOT NULL DEFAULT '',
+				country_phone_code VARCHAR(10) NOT NULL DEFAULT '',
+				lang_code VARCHAR(10) NOT NULL DEFAULT '',
                 password_hash VARCHAR(100) NOT NULL,
-				user_avatar_path TEXT
-				-- user_avatar_path TEXT DEFAULT ''
+				user_avatar_path TEXT NOT NULL DEFAULT '',
+				dark_mode BOOLEAN NOT NULL DEFAULT FALSE
             );`,
 		"user_roles": `
             CREATE TABLE IF NOT EXISTS user_roles (
@@ -160,9 +165,26 @@ func _CreateTables() error {
                 description TEXT,
                 start_date DATE,
                 end_date DATE,
-                project_lead_id INT,
-				image_path TEXT
+				tag_id INT NOT NULL,
+                project_lead_id INT NOT NULL,
+				image_path TEXT,
+				FOREIGN KEY (project_lead_id) REFERENCES users(id),
+				FOREIGN KEY (tag_id) REFERENCES project_tags(id)
             );`,
+		"project_tags": ` 
+			CREATE TABLE IF NOT EXISTS project_tags (
+				id SERIAL PRIMARY KEY,
+				project_id INT NULL,
+				tag_name VARCHAR(100) NOT NULL,
+				FOREIGN KEY (project_id) REFERENCES projects(id)
+			);`,
+		"priority": `
+			CREATE TABLE IF NOT EXISTS priority (
+				id SERIAL PRIMARY KEY,
+				priority_name VARCHAR(20) NOT NULL,
+				priority_description TEXT,
+				priority_rgb_color VARCHAR(10) NOT NULL
+			);`,
 		"task_status": `
             CREATE TABLE IF NOT EXISTS task_status (
                 id SERIAL PRIMARY KEY,
@@ -184,9 +206,9 @@ func _CreateTables() error {
                 assigned_user INT,
                 deadline DATE,
 				image_path TEXT[],
-                FOREIGN KEY (project_id) REFERENCES projects(id),
-                FOREIGN KEY (assigned_user) REFERENCES users(id),
-                FOREIGN KEY (status_id) REFERENCES task_status(id)
+				FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (status_id) REFERENCES task_status(id),
+                FOREIGN KEY (assigned_user) REFERENCES users(id)
             );`,
 		"team_members": `
             CREATE TABLE IF NOT EXISTS team_members (
@@ -228,7 +250,7 @@ func _CreateTables() error {
 				FOREIGN KEY (user_id) REFERENCES users(id)
 			);`,
 	}
-	tableOrder := []string{"users", "user_roles", "projects", "task_status", "tasks", "team_members", "comments", "sessions", "user_contacts"}
+	tableOrder := []string{"users", "user_roles", "projects", "project_tags", "priority", "task_status", "tasks", "team_members", "comments", "sessions", "user_contacts"}
 	// Iterate over the map and execute each SQL query
 	done := make(chan bool)
 	log.Println("waiting for table creation...")
@@ -252,6 +274,10 @@ func _CreateTables() error {
 	log.Println("Tables have been created successfully.")
 	// Insert data into the user_roles table
 	insertUserRoles(database)
+	// Insert data into the project_tags table
+	insertTag(database)
+	// Insert data into the priority table
+	insertPriority(database)
 	return nil
 }
 
@@ -269,6 +295,7 @@ func _TableExists(tableName string, db *sql.DB) {
 	}
 }
 
+// ** Function to insert default data into the user_roles table
 func insertUserRoles(db *sql.DB) {
 	log.Println("Inserting data into user_roles table...")
 	var count int
@@ -298,6 +325,63 @@ func insertUserRoles(db *sql.DB) {
 	}
 }
 
+func insertTag(db *sql.DB) {
+	log.Println("Inserting data into project_tags table...")
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM project_tags").Scan(&count)
+	if err != nil {
+		panic(fmt.Sprintf("Error counting rows in project_tags table: %s", err))
+	}
+	// If count is greater than zero, print a message indicating that the data already exists in the project_tags table
+	if count > 0 {
+		log.Println("Data already exists in project_tags table. Skipping insertion.")
+	} else {
+		// If the count is zero, insert the data into the project_tags table
+		_, err := db.Exec(`
+		INSERT INTO project_tags (tag_name) VALUES
+		('Web Development'),
+		('Mobile Development'),
+		('Desktop Development'),
+		('Game Development'),
+		('Data Science'),
+		('Machine Learning'),
+		('Artificial Intelligence'),
+		('Cybersecurity'),
+		('Networking'),
+		('Cloud Computing')`)
+		if err != nil {
+			log.Printf("Error inserting tag information into project_tags table: %s", err)
+		}
+		log.Println("Information has been inserted into the project_tags table.")
+	}
+}
+
+func insertPriority(db *sql.DB) {
+	log.Println("Inserting data into priority table...")
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM priority").Scan(&count)
+	if err != nil {
+		panic(fmt.Sprintf("Error counting rows in priority table: %s", err))
+	}
+	// If count is greater than zero, print a message indicating that the data already exists in the priority table
+	if count > 0 {
+		log.Println("Data already exists in priority table. Skipping insertion.")
+	} else {
+		// If the count is zero, insert the data into the priority table
+		_, err := db.Exec(`
+		INSERT INTO priority (priority_name, priority_description, priority_rgb_color) VALUES
+		('Low', 'Low priority task.', '#00FF00'),
+		('Medium', 'Medium priority task.', '#D9FF00'),
+		('High', 'High priority task.', '#FF7300'),
+		('Critical', 'Critical priority task.', '#FF0000')`)
+		if err != nil {
+			log.Printf("Error inserting priority information into priority table: %s", err)
+		}
+		log.Println("Information has been inserted into the priority table.")
+	}
+}
+
+// ** Function to insert default data into the task_status table
 func InsertTaskStatus(db *sql.DB, projectID int, userID int) {
 	log.Println("Inserting data into task_status table...")
 	var count int

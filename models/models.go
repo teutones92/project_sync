@@ -14,7 +14,7 @@ type AllData struct {
 // StatusCode represent the structure of a status code
 type StatusCode struct {
 	StatusCode        int    `json:"status_code"`
-	StatusCodeMessage string `json:"status_code_name"`
+	StatusCodeMessage string `json:"status_code_message"`
 }
 
 // Error implements error.
@@ -24,12 +24,18 @@ func (s StatusCode) Error() string {
 
 // User represent the structure of a user
 type User struct {
-	ID           int    `json:"id"`
-	Username     string `json:"username"`
-	Email        string `json:"email"`
-	PasswordHash string `json:"-"`
-	Password     string `json:"password"`
-	UserAvatar   string `json:"user_avatar_path"`
+	ID               int    `json:"id"`
+	Username         string `json:"username"`
+	Email            string `json:"email"`
+	DoB              string `json:"DoB"`
+	PhoneNumber      string `json:"phone_number"`
+	CountryCode      string `json:"country_code"`
+	CountryPhoneCode string `json:"country_phone_code"`
+	LangCode         string `json:"lang_code"`
+	PasswordHash     string `json:"password_hash"`
+	Password         string `json:"password"`
+	UserAvatar       string `json:"user_avatar_path"`
+	DarkMode         *bool  `json:"dark_mode"`
 }
 
 // UserRole represent the structure of a user role
@@ -48,6 +54,21 @@ type Project struct {
 	EndDate       string `json:"end_date"`
 	ProjectLeadID int    `json:"project_lead_id"`
 	ImagePath     string `json:"image_path"`
+}
+
+// ProjectTag represent the structure of a project tag
+type ProjectTag struct {
+	ID        int    `json:"id"`
+	ProjectID int    `json:"project_id"`
+	TagName   string `json:"tag_name"`
+}
+
+// Priority represent the structure of a project priority
+type Priority struct {
+	ID                  int    `json:"id"`
+	PriorityName        string `json:"priority_name"`
+	PriorityDescription string `json:"priority_description"`
+	PriorityColor       string `json:"priority_color"`
 }
 
 // Task represent the structure of a task

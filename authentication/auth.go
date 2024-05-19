@@ -7,7 +7,7 @@ import (
 	"app/models"
 	"app/utils"
 	"encoding/json"
-	"errors"
+
 	"fmt"
 	"log"
 	"net/http"
@@ -15,19 +15,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
-
-func validate(u models.User, from_login bool) error {
-	if u.Username == "" && !from_login {
-		return errors.New("username is required")
-	}
-	if u.Email == "" {
-		return errors.New("email is required")
-	}
-	if u.Password == "" {
-		return errors.New("password is required")
-	}
-	return nil
-}
 
 // ** [SignUp] is a function that handles the sign up process
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -45,10 +32,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Verify the token
-	verify := utils.VerifyToken(w, r)
-	if !verify {
-		return
-	}
+	// verify := utils.VerifyToken(w, r)
+	// if !verify {
+	// 	return
+	// }
 	var req models.User
 	// Parse the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -59,7 +46,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Validate the user data
-	e := validate(req, false)
+	e := utils.Validate(req, false)
 	if e != nil {
 		// http.Error(w, e.Error(), http.StatusBadRequest)
 		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: e.Error()}
@@ -76,8 +63,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Generate a hash for the password
-	hashedPassword, _ := hasGenerator(req.Password)
+	hashedPassword, _ := hashGenerator(req.Password)
 	req.PasswordHash = hashedPassword
+	// Create the user in the database
 	resp := user_crud.CreateUser(req)
 	// Return a response to the client indicating that the user has been created
 	json.NewEncoder(w).Encode(resp)
@@ -99,23 +87,24 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	if !header {
 		return
 	}
-	// Verify the token
-	verify := utils.VerifyToken(w, r)
-	if !verify {
-		return
-	}
+	// // Verify the token
+	// verify := utils.VerifyToken(w, r)
+	// if !verify {
+	// 	return
+	// }
 	var req models.User
 	// Parse the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		// http.Error(w, err.Error(), http.StatusBadRequest)
 		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: err.Error()}
+		log.Println("Error decoding request body")
 		json.NewEncoder(w).Encode(status_code)
 		return
 	}
 
 	// Validate the user data
-	e := validate(req, true)
+	e := utils.Validate(req, true)
 	if e != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: e.Error()}
 		json.NewEncoder(w).Encode(status_code)
@@ -131,7 +120,12 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the user data from the database
-	user := user_crud.ReadUserByID(userID)
+	user, _err := user_crud.ReadUserByID(userID)
+	if _err != nil {
+		status_code = models.StatusCode{StatusCode: http.StatusUnauthorized, StatusCodeMessage: _err.Error()}
+		json.NewEncoder(w).Encode(status_code)
+		return
+	}
 	// Generate a JWT token
 	token, err := generateJWT(userID)
 	if err != nil {
@@ -172,12 +166,11 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the token from the request header
-	if !utils.VerifyToken(w, r) {
-		return
-	}
+	// if !utils.VerifyToken(w, r) {
+	// 	return
+	// }
 	token := r.Header.Get("Authorization")
 	if token == "" {
-		// http.Error(w, "Token is required", http.StatusBadRequest)
 		status_code := models.StatusCode{StatusCode: http.StatusBadRequest, StatusCodeMessage: "Token is required"}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println("Token is required")
@@ -187,7 +180,7 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 	status := session_crud.DeleteSession(token)
 	// Return a response to the client indicating that the user has been logged out
 	json.NewEncoder(w).Encode(status)
-	log.Println("User logged out successfully")
+	log.Println("User logged out successfully and session deleted")
 }
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -237,8 +230,9 @@ func checkUserCredentials(email, password string) (bool, int) {
 	db := db_connection.GetDatabase()
 	var userID int
 	var hashedPassword string
+	// Compare the hashed password with the password provided by the user
 	// Query the database to get the user ID and hashed password
-	er := db.QueryRow("SELECT user_id, password_hash FROM users WHERE email = $1", email).Scan(&userID, &hashedPassword)
+	er := db.QueryRow("SELECT id, password_hash FROM users WHERE email = $1", email).Scan(&userID, &hashedPassword)
 	if er != nil {
 		return false, 0
 	}
@@ -269,7 +263,7 @@ func checkUserExists(email string) bool {
 }
 
 // Local function to generate a hash for the password
-func hasGenerator(password string) (string, error) {
+func hashGenerator(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println("Error generating hash: ", err)

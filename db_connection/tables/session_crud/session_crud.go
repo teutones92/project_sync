@@ -27,7 +27,7 @@ func ReadSession(token string) (models.Session, error) {
 	db := db_connection.GetDatabase()
 	var session models.Session
 	// Query the database to get the session data
-	er := db.QueryRow("SELECT session_id, user_id, token, last_activity_timestamp, expiration_minutes"+
+	er := db.QueryRow("SELECT id, user_id, token, last_activity_timestamp, expiration_minutes"+
 		" FROM sessions WHERE token = $1",
 		token).Scan(
 		&session.ID,

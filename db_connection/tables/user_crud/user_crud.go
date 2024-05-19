@@ -14,8 +14,8 @@ import (
 func CreateUser(user_data models.User) models.StatusCode {
 	// Insert data into the users table
 	_, err := db_connection.GetDatabase().Exec(`
-        INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)`,
-		user_data.Username, user_data.Email, user_data.PasswordHash)
+        INSERT INTO users (username, email, password_hash, dark_mode) VALUES ($1, $2, $3, $4)`,
+		user_data.Username, user_data.Email, user_data.PasswordHash, user_data.DarkMode)
 	if err != nil {
 		panic(fmt.Sprintf("Error inserting data into users table: users %s", err))
 	}
@@ -28,7 +28,7 @@ func ReadUserAPI(w http.ResponseWriter, r *http.Request) {
 	// Set the response header
 	utils.SetHeader(w)
 	// Check the request method
-	method := utils.CheckMethod(w, r, "PUT")
+	method := utils.CheckMethod(w, r, "GET")
 	if !method {
 		return
 	}
@@ -44,47 +44,67 @@ func ReadUserAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	var user models.User
 	// Decode the request body into a user struct
-	err := json.NewDecoder(r.Body).Decode(&user.ID)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("Error decoding request body: %v", err)
-		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-	}
-	// Query the database to get the user data
-	er := ReadUserByID(user.ID)
-	if er != nil {
-		log.Printf("Error getting user data: %v", er)
+		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body. Must provide user ID. as JSON object {\"id\": 1}"})
 		return
 	}
-	json.NewEncoder(w).Encode(user)
+	// Query the database to get the user data
+	var new_user *models.User
+	new_user, er := ReadUserByID(user.ID)
+
+	if er != nil {
+		log.Printf("Error getting user data: %v", er)
+		// Return a response to the client indicating that there was an error getting the user data
+		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error getting user data."})
+		return
+	}
+	json.NewEncoder(w).Encode(new_user)
 }
 
-func ReadUserByID(user_id int) *models.User {
+func ReadUserByID(user_id int) (*models.User, error) {
 
 	db := db_connection.GetDatabase()
 	var user models.User
 	// Query the database to get the user data
-	er := db.QueryRow("SELECT user_id, username, email, password_hash, user_avatar_path FROM users WHERE user_id = $1", user.ID).Scan(
+	er := db.QueryRow("SELECT id, username, email, dob, phone_number, country_code, country_phone_code, lang_code, user_avatar_path, dark_mode FROM users WHERE id = $1", user_id).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
-		&user.PasswordHash,
+		&user.DoB,
+		&user.PhoneNumber,
+		&user.CountryCode,
+		&user.CountryPhoneCode,
+		&user.LangCode,
 		&user.UserAvatar,
+		&user.DarkMode,
 	)
 	if er != nil {
 		log.Printf("Error getting user data: %s", er)
+		db.Close()
+		return nil, er
 	}
 	db.Close()
-	return &user
+	return &user, nil
 }
 
 func UpdateUser(user_data *models.User) models.StatusCode {
 	// Update the user data in the database
 	// email = $2, // user_data.Email, // no need to update email
 	_, err := db_connection.GetDatabase().Exec(`
-		UPDATE users SET username = $1, 
-		user_avatar_path
-		= $3 WHERE user_id = $4`,
-		user_data.Username, user_data.UserAvatar, user_data.ID)
+		UPDATE users SET 
+		(username, user_avatar_path, dark_mode, DoB, phone_number, country_code, country_phone_code, lang_code) = ($2, $3, $4, $5, $6, $7, $8, $9) WHERE id = $1`,
+		user_data.ID,
+		user_data.Username,
+		user_data.UserAvatar,
+		user_data.DarkMode,
+		user_data.DoB,
+		user_data.PhoneNumber,
+		user_data.CountryCode,
+		user_data.CountryPhoneCode,
+		user_data.LangCode,
+	)
 	if err != nil {
 		panic(fmt.Sprintf("Error updating user data: %s", err))
 	}
@@ -173,7 +193,7 @@ func ChangePasswordAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	if session.ID > 0 {
 		// Get the user data from the database
-		var user_data = ReadUserByID(session.UserID)
+		var user_data, _ = ReadUserByID(session.UserID)
 		// Compare the password in the request body with the password in the database
 		if user_data.PasswordHash == user.PasswordHash {
 			// Update the user's password in the database
