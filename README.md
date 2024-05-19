@@ -1,3 +1,3 @@
-# project_sync
+# Project Sync
 
 A new Flutter project.

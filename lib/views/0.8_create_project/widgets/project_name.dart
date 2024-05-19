@@ -14,9 +14,9 @@ class ProjectName extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Project Name',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: ThemeX.subtitleText,
             ),
             const SizedBox(width: 10),
             Text('*', style: ThemeX.errorTextStyle)

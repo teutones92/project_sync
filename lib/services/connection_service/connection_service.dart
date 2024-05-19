@@ -1,4 +1,4 @@
-import 'package:project_sync/models/app/http_method_model/http_method.dart';
+import 'package:project_sync/global/http_method/http_method.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,7 +10,7 @@ class ConnectionService {
   static Future<Response> connectionHandler(
       {required String method,
       required String subUrl,
-      required Object? data}) async {
+      required Map data}) async {
     final pref = await SharedPreferences.getInstance();
     final Map<String, String> header = {
       'Content-Type': 'application/json',

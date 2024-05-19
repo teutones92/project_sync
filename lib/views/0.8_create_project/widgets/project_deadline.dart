@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_sync/core/extensions.dart';
 
 import '../../../global/widgets/custom_body_text_field.dart';
 
@@ -13,9 +14,9 @@ class ProjectDeadLine extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Project Deadline',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: ThemeX.subtitleText,
         ),
         const SizedBox(height: 10),
         Row(

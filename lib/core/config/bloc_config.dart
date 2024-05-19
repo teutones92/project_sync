@@ -8,3 +8,4 @@ export '../../blocs/user_data_bloc.dart';
 export '../../blocs/animate_side_menu_bloc.dart';
 export '../../blocs/side_menu_bloc.dart';
 export '../../blocs/dashboard_analytic_bloc.dart';
+export '../../blocs/priority_bloc.dart';

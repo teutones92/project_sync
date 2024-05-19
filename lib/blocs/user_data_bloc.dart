@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:project_sync/models/repository/status_code_model/status_code_model.dart';
 import 'package:project_sync/models/repository/user_model/user_model.dart';
 import 'package:project_sync/services/user_service/user_service.dart';

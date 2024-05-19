@@ -1,5 +1,5 @@
 import 'package:project_sync/blocs/user_data_bloc.dart';
-import 'package:project_sync/models/app/http_method_model/http_method.dart';
+import 'package:project_sync/global/http_method/http_method.dart';
 import 'package:project_sync/models/repository/status_code_model/status_code_model.dart';
 import 'package:project_sync/models/repository/user_model/user_model.dart';
 import 'package:project_sync/services/connection_service/connection_service.dart';

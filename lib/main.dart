@@ -1,3 +1,4 @@
+import 'package:project_sync/blocs/priority_bloc.dart';
 import 'package:project_sync/core/config/bloc_config.dart';
 import 'package:project_sync/core/extensions.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => DashboardAnalyticBloc(),
+        ),
+        BlocProvider(
+          create: (context) => PriorityBloc(),
         ),
       ],
       child: BlocBuilder<DarkModeBloc, ThemeMode>(

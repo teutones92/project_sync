@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_sync/core/extensions.dart';
 
 class ProjectTeamMembers extends StatelessWidget {
   const ProjectTeamMembers({super.key});
@@ -8,9 +9,9 @@ class ProjectTeamMembers extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Project Members',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: ThemeX.subtitleText,
         ),
         const SizedBox(height: 10),
         SizedBox(
