@@ -64,129 +64,70 @@ func userApis(mux *http.ServeMux) error {
 // User Roles
 func userRolesApis(mux *http.ServeMux) {
 	// mux.HandleFunc("/user_roles/create", user_role.CreateUserRoleAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/user_roles/read", user_role.ReadUserRoleAPI)
+	mux.HandleFunc(apiVersion+"/user_roles/read", user_role.ReadUserRoleAPI)
 	// mux.HandleFunc("/user_roles/update", user_role.UpdateUserRoleAPI)
 	// mux.HandleFunc("/user_roles/delete", user_role.DeleteUserRoleAPI)
 }
 
 // Projects API
 func projectsApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/projects/create", project.CreateProject)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/projects/read", project.ReadProjectByID)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/projects/update", project.UpdateProject)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/projects/delete", project.DeleteProject)
+	mux.HandleFunc(apiVersion+"/projects/create", project.CreateProject)
+	mux.HandleFunc(apiVersion+"/projects/read", project.ReadProjectByID)
+	mux.HandleFunc(apiVersion+"/projects/update", project.UpdateProject)
+	mux.HandleFunc(apiVersion+"/projects/delete", project.DeleteProject)
 }
 
 // Project Tags API
 func projectTagsApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/project_tags/create", project_tag.CreateProjectTagAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/project_tags/read", project_tag.ReadProjectTagAPI)
-	// mux.HandleFunc(apiVersion+
-	// 	apiVersion+
-	// 	apiVersion+"/project_tags/update", project_tags_crud.UpdateProjectTagAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/project_tags/delete", project_tag.DeleteProjectTagAPI)
+	mux.HandleFunc(apiVersion+"/project_tags/create", project_tag.CreateProjectTagAPI)
+	mux.HandleFunc(apiVersion+"/project_tags/read", project_tag.ReadProjectTagAPI)
+	// mux.HandleFunc(
+	//
+	// 	"/project_tags/update", project_tags_crud.UpdateProjectTagAPI)
+	mux.HandleFunc(apiVersion+"/project_tags/delete", project_tag.DeleteProjectTagAPI)
 }
 
 // Priority API
 func priorityApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/priority/read", priority.ReadPriorityAPI)
-
+	mux.HandleFunc(apiVersion+"/priority/read", priority.ReadPriorityAPI)
 }
 
 // Task Status API
 func taskStatusApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/task_status/create", taskStatus.CreateTaskStatusAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/task_status/read", taskStatus.ReadTaskStatusByProjectIDApi)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/task_status/update", taskStatus.DeleteTaskStatusByProjectIdAndUserIdAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/task_status/delete", taskStatus.DeleteTaskStatusByProjectIdAndUserIdAPI)
+	mux.HandleFunc(apiVersion+"/task_status/create", taskStatus.CreateTaskStatusAPI)
+	mux.HandleFunc(apiVersion+"/task_status/read", taskStatus.ReadTaskStatusByProjectIDApi)
+	mux.HandleFunc(apiVersion+"/task_status/update", taskStatus.DeleteTaskStatusByProjectIdAndUserIdAPI)
+	mux.HandleFunc(apiVersion+"/task_status/delete", taskStatus.DeleteTaskStatusByProjectIdAndUserIdAPI)
 }
 
 // Task API
 func taskApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/tasks/create", task.CreateTaskAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/tasks/read", task.ReadTaskByProjectIDAndStatusIdAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/tasks/update", task.UpdateTaskAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/tasks/delete", task.DeleteTaskAPI)
+	mux.HandleFunc(apiVersion+"/tasks/create", task.CreateTaskAPI)
+	mux.HandleFunc(apiVersion+"/tasks/read", task.ReadTaskByProjectIDAndStatusIdAPI)
+	mux.HandleFunc(apiVersion+"/tasks/update", task.UpdateTaskAPI)
+	mux.HandleFunc(apiVersion+"/tasks/delete", task.DeleteTaskAPI)
 }
 
 // Team Members API
 func teamMembersApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/team_members/create", team_member.CreateTeamMemberAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/team_members/read", team_member.ReadTeamMembersAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/team_members/update", team_member.UpdateTeamMemberAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/team_members/delete", team_member.DeleteTeamMemberAPI)
+	mux.HandleFunc(apiVersion+"/team_members/create", team_member.CreateTeamMemberAPI)
+	mux.HandleFunc(apiVersion+"/team_members/read", team_member.ReadTeamMembersAPI)
+	mux.HandleFunc(apiVersion+"/team_members/update", team_member.UpdateTeamMemberAPI)
+	mux.HandleFunc(apiVersion+"/team_members/delete", team_member.DeleteTeamMemberAPI)
 }
 
 // Comments API
 func commentsApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/comments/create", comments.CreateCommentAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/comments/read", comments.ReadCommentsAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/comments/update", comments.UpdateCommentAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/comments/delete", comments.DeleteCommentAPI)
+	mux.HandleFunc(apiVersion+"/comments/create", comments.CreateCommentAPI)
+	mux.HandleFunc(apiVersion+"/comments/read", comments.ReadCommentsAPI)
+	mux.HandleFunc(apiVersion+"/comments/update", comments.UpdateCommentAPI)
+	mux.HandleFunc(apiVersion+"/comments/delete", comments.DeleteCommentAPI)
 }
 
 // UserContacts API
 func userContactsApis(mux *http.ServeMux) {
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/user_contacts/create", user_contacts.CreateUserContactAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/user_contacts/read", user_contacts.ReadUserContactByUserIdAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/user_contacts/update", user_contacts.UpdateUserContactAPI)
-	mux.HandleFunc(apiVersion+
-		apiVersion+
-		apiVersion+"/user_contacts/delete", user_contacts.DeleteUserContactAPI)
+	mux.HandleFunc(apiVersion+"/user_contacts/create", user_contacts.CreateUserContactAPI)
+	mux.HandleFunc(apiVersion+"/user_contacts/read", user_contacts.ReadUserContactByUserIdAPI)
+	mux.HandleFunc(apiVersion+"/user_contacts/update", user_contacts.UpdateUserContactAPI)
+	mux.HandleFunc(apiVersion+"/user_contacts/delete", user_contacts.DeleteUserContactAPI)
 }

@@ -30,7 +30,7 @@ func ReadPriorityAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	// Query the database to get the priority data
 	var priority *models.Priority
-	priority, er := ReadPriorityByID()
+	priority, er := readPriority()
 	if er != nil {
 		log.Printf("Error getting priority data: %v", er)
 		// Return a response to the client indicating that there was an error getting the priority data
@@ -42,22 +42,22 @@ func ReadPriorityAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 // ReadPriorityByID reads a priority by ID
-func ReadPriorityByID() (*models.Priority, error) {
+func readPriority() (*models.Priority, error) {
 	db := db_connection.GetDatabase()
 	// Query the database to get the priority data
 	rows, err := db.Query("SELECT * FROM priority")
 	if err != nil {
+		print(rows)
 		return nil, err
 	}
 	defer rows.Close()
 	var priority models.Priority
 	// Get the priority data
 	for rows.Next() {
-		err = rows.Scan(&priority.ID, &priority.PriorityName, &priority.PriorityColor)
+		err = rows.Scan(&priority.ID, &priority.PriorityName, &priority.PriorityDescription)
 		if err != nil {
 			return nil, err
 		}
 	}
-	// Return the priority data
 	return &priority, nil
 }
