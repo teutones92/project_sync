@@ -23,11 +23,8 @@ var apiVersion = "/v1"
 
 // Start the server
 func StartServer() error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, Welcome to Project Sync!"))
-	})
-	log.Printf("Server running on %s%s", Host, Port)
 	mux := http.NewServeMux()
+	rootApi(mux)
 	authApis(mux)
 	userApis(mux)
 	userRolesApis(mux)
@@ -39,8 +36,16 @@ func StartServer() error {
 	teamMembersApis(mux)
 	commentsApis(mux)
 	userContactsApis(mux)
-	err := http.ListenAndServe(Port, nil)
+	log.Printf("Server running on %s%s", Host, Port)
+	err := http.ListenAndServe(Port, mux)
 	return err
+}
+
+// Root API
+func rootApi(mux *http.ServeMux) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, Welcome to Project Sync!"))
+	})
 }
 
 // Auth API
@@ -52,13 +57,10 @@ func authApis(mux *http.ServeMux) {
 }
 
 // Users API
-func userApis(mux *http.ServeMux) error {
+func userApis(mux *http.ServeMux) {
 	mux.HandleFunc(apiVersion+"/user/read", user.ReadUserAPI)
 	mux.HandleFunc(apiVersion+"/user/update", user.UpdateUserAPI)
 	mux.HandleFunc(apiVersion+"/user/change_password", user.ChangePasswordAPI)
-
-	err := http.ListenAndServe(Port, mux)
-	return err
 }
 
 // User Roles

@@ -46,13 +46,13 @@ func CreateProjectTagAPI(w http.ResponseWriter, r *http.Request) {
 // createProjectTag creates a project tag
 func createProjectTag(project_tag_data models.ProjectTag) models.StatusCode {
 	// Insert data into the project_tags table
-	_, err := db_connection.GetDatabase().Exec(`
+	_, err := db_connection.Database.Exec(`
 		INSERT INTO project_tags (project_id, tag_name) VALUES ($1, $2)`,
 		project_tag_data.ProjectID, project_tag_data.TagName)
 	if err != nil {
 		panic(fmt.Sprintf("Error inserting data into project_tags table: project_tags %s", err))
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag created."}
 
 }
@@ -99,7 +99,7 @@ func ReadProjectTagAPI(w http.ResponseWriter, r *http.Request) {
 
 // readProjectTagByID reads a project tag by ID
 func readProjectTagByID(project_tag_id int) (*models.ProjectTag, error) {
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Query the database to get the project tag data
 	rows, err := db.Query("SELECT * FROM project_tags WHERE id=$1", project_tag_id)
 	if err != nil {
@@ -154,13 +154,13 @@ func readProjectTagByID(project_tag_id int) (*models.ProjectTag, error) {
 // // updateProjectTag updates a project tag
 // func updateProjectTag(project_tag_data models.ProjectTag) models.StatusCode {
 // 	// Update data in the project_tags table
-// 	_, err := db_connection.GetDatabase().Exec(`
+// 	_, err := db_connection.Database.Exec(`
 // 		UPDATE project_tags SET project_id=$1, tag_name=$2 WHERE id=$3`,
 // 		project_tag_data.ProjectID, project_tag_data.TagName, project_tag_data.ID)
 // 	if err != nil {
 // 		panic(fmt.Sprintf("Error updating data in project_tags table: project_tags %s", err))
 // 	}
-// 	db_connection.GetDatabase().Close()
+// 	db_connection.Database.Close()
 // 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag updated."}
 // }
 
@@ -200,10 +200,10 @@ func DeleteProjectTagAPI(w http.ResponseWriter, r *http.Request) {
 // deleteProjectTag deletes a project tag
 func deleteProjectTag(project_tag_id int) models.StatusCode {
 	// Delete data from the project_tags table
-	_, err := db_connection.GetDatabase().Exec("DELETE FROM project_tags WHERE id=$1", project_tag_id)
+	_, err := db_connection.Database.Exec("DELETE FROM project_tags WHERE id=$1", project_tag_id)
 	if err != nil {
 		panic(fmt.Sprintf("Error deleting data from project_tags table: project_tags %s", err))
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag deleted."}
 }

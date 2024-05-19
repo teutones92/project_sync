@@ -59,7 +59,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Insert the project struct into the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err = db.Exec("INSERT INTO projects "+
 		"(project_name, description, start_date, "+
 		"end_date, project_lead_id,"+
@@ -74,7 +74,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	// Read User by ID
@@ -99,13 +99,13 @@ func ReadProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Read the project from the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	rows, err := db.Query("SELECT * FROM projects")
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	defer rows.Close()
@@ -124,13 +124,13 @@ func ReadProjects(w http.ResponseWriter, r *http.Request) {
 			status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 			json.NewEncoder(w).Encode(status_code)
 			log.Println(err)
-			db.Close()
+
 			return
 		}
 		projects = append(projects, project)
 	}
 	json.NewEncoder(w).Encode(projects)
-	db.Close()
+
 }
 
 // Function to read a project by ID from the database
@@ -170,13 +170,13 @@ func ReadProjectByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Read the project from the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	rows, err := db.Query("SELECT * FROM projects WHERE project_id=$1", projectID)
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	defer rows.Close()
@@ -194,12 +194,12 @@ func ReadProjectByID(w http.ResponseWriter, r *http.Request) {
 			status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 			json.NewEncoder(w).Encode(status_code)
 			log.Println(err)
-			db.Close()
+
 			return
 		}
 	}
 	json.NewEncoder(w).Encode(project)
-	db.Close()
+
 }
 
 // Function to read a project by project lead ID from the database
@@ -235,13 +235,13 @@ func ReadProjectByProjectLeadID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Read the project from the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	rows, err := db.Query("SELECT * FROM projects WHERE project_lead_id=$1", projectLeadID)
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	defer rows.Close()
@@ -260,13 +260,13 @@ func ReadProjectByProjectLeadID(w http.ResponseWriter, r *http.Request) {
 			status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 			json.NewEncoder(w).Encode(status_code)
 			log.Println(err)
-			db.Close()
+
 			return
 		}
 		projects = append(projects, project)
 	}
 	json.NewEncoder(w).Encode(projects)
-	db.Close()
+
 }
 
 func UpdateProject(w http.ResponseWriter, r *http.Request) {
@@ -303,7 +303,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the project struct in the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err = db.Exec("UPDATE projects SET "+
 		"project_name=$1, description=$2, start_date=$3, "+
 		"end_date=$4, project_lead_id=$5, image_path=$6 "+
@@ -319,7 +319,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	status_code = models.StatusCode{StatusCode: http.StatusOK, StatusCodeMessage: "Project updated successfully"}
@@ -362,13 +362,13 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Delete the project from the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err := db.Exec("DELETE FROM projects WHERE project_id=$1", project.ID)
 	if err != nil {
 		status_code = models.StatusCode{StatusCode: http.StatusInternalServerError, StatusCodeMessage: err.Error()}
 		json.NewEncoder(w).Encode(status_code)
 		log.Println(err)
-		db.Close()
+
 		return
 	}
 	task_crud.DeleteTaskByProjectID(project.ID)

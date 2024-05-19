@@ -13,13 +13,13 @@ import (
 
 func CreateUser(user_data models.User) models.StatusCode {
 	// Insert data into the users table
-	_, err := db_connection.GetDatabase().Exec(`
+	_, err := db_connection.Database.Exec(`
         INSERT INTO users (username, email, password_hash, dark_mode) VALUES ($1, $2, $3, $4)`,
 		user_data.Username, user_data.Email, user_data.PasswordHash, user_data.DarkMode)
 	if err != nil {
 		panic(fmt.Sprintf("Error inserting data into users table: users %s", err))
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User created."}
 
 }
@@ -65,7 +65,7 @@ func ReadUserAPI(w http.ResponseWriter, r *http.Request) {
 
 func ReadUserByID(user_id int) (*models.User, error) {
 
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	var user models.User
 	// Query the database to get the user data
 	er := db.QueryRow("SELECT id, username, email, dob, phone_number, country_code, country_phone_code, lang_code, user_avatar_path, dark_mode FROM users WHERE id = $1", user_id).Scan(
@@ -82,17 +82,17 @@ func ReadUserByID(user_id int) (*models.User, error) {
 	)
 	if er != nil {
 		log.Printf("Error getting user data: %s", er)
-		db.Close()
+
 		return nil, er
 	}
-	db.Close()
+
 	return &user, nil
 }
 
 func UpdateUser(user_data *models.User) models.StatusCode {
 	// Update the user data in the database
 	// email = $2, // user_data.Email, // no need to update email
-	_, err := db_connection.GetDatabase().Exec(`
+	_, err := db_connection.Database.Exec(`
 		UPDATE users SET 
 		(username, user_avatar_path, dark_mode, DoB, phone_number, country_code, country_phone_code, lang_code) = ($2, $3, $4, $5, $6, $7, $8, $9) WHERE id = $1`,
 		user_data.ID,
@@ -108,7 +108,7 @@ func UpdateUser(user_data *models.User) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error updating user data: %s", err))
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User updated."}
 }
 
@@ -146,11 +146,11 @@ func UpdateUserAPI(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(user_id int) models.StatusCode {
 	// Delete the user from the database
-	_, err := db_connection.GetDatabase().Exec("DELETE FROM users WHERE user_id = $1", user_id)
+	_, err := db_connection.Database.Exec("DELETE FROM users WHERE user_id = $1", user_id)
 	if err != nil {
 		panic(fmt.Sprintf("Error deleting user: %s", err))
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User deleted."}
 }
 

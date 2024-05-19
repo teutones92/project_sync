@@ -227,7 +227,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 // Local function to check if the user credentials are valid
 func checkUserCredentials(email, password string) (bool, int) {
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	var userID int
 	var hashedPassword string
 	// Compare the hashed password with the password provided by the user
@@ -242,7 +242,7 @@ func checkUserCredentials(email, password string) (bool, int) {
 		// If the passwords do not match, return false
 		return false, 0
 	}
-	db.Close()
+
 	// If the passwords match, return true
 	return true, userID
 
@@ -250,14 +250,14 @@ func checkUserCredentials(email, password string) (bool, int) {
 
 // Local function to check if the user already exists in the database
 func checkUserExists(email string) bool {
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	var count int
 	// er := db.QueryRow("SELECT COUNT(*) FROM users WHERE username = $1 OR email = $2", user_data.Username, user_data.Email).Scan(&count)
 	er := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1", email).Scan(&count)
 	if er != nil {
 		panic(fmt.Sprintf("Error checking if user exists: %s", er))
 	}
-	db.Close()
+
 	// If count is greater than zero, indicate that the user already exists
 	return count > 0
 }

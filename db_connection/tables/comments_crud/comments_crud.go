@@ -28,20 +28,20 @@ func CreateCommentAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Decode the request body into a comment struct
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Check if the task ID, project ID and user ID are provided
 	if comment.TaskID == 0 && comment.ProjectID == 0 && comment.UserID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Task ID, Project ID and User ID not provided."})
-		db.Close()
+
 		return
 	}
 	_, err = db.Exec("INSERT INTO comments ("+
@@ -57,7 +57,7 @@ func CreateCommentAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error inserting data into comments table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error creating comment."})
-		db.Close()
+
 		return
 	}
 	json.NewEncoder(w).Encode(models.StatusCode{StatusCode: 200, StatusCodeMessage: "Comment created successfully."})
@@ -82,19 +82,19 @@ func ReadCommentsAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Get the task ID from the query parameter
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	if comment.TaskID == 0 && comment.ProjectID == 0 && comment.UserID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Task ID, Project ID and User ID required."})
-		db.Close()
+
 		return
 	}
 
@@ -104,7 +104,7 @@ func ReadCommentsAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error querying the database: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading comment."})
-		db.Close()
+
 		return
 	}
 	// Create a slice of comments
@@ -115,7 +115,7 @@ func ReadCommentsAPI(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error scanning rows: %s", err)
 			json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading comment."})
-			db.Close()
+
 			return
 		}
 		comments = append(comments, comment)
@@ -142,20 +142,20 @@ func UpdateCommentAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Decode the request body into a comment struct
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Check if the comment ID is provided
 	if comment.ID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Comment ID not provided."})
-		db.Close()
+
 		return
 	}
 	_, err = db.Exec("UPDATE comments SET "+
@@ -166,7 +166,7 @@ func UpdateCommentAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error updating data in comments table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error updating comment."})
-		db.Close()
+
 		return
 	}
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Comment updated successfully."})
@@ -191,27 +191,27 @@ func DeleteCommentAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Decode the request body into a comment struct
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Check if the comment ID is provided
 	if comment.ID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Comment ID not provided."})
-		db.Close()
+
 		return
 	}
 	_, err = db.Exec("DELETE FROM comments WHERE id = $1", comment.ID)
 	if err != nil {
 		log.Printf("Error deleting data from comments table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error deleting comment."})
-		db.Close()
+
 		return
 	}
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Comment deleted successfully."})

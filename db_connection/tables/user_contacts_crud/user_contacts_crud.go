@@ -54,7 +54,7 @@ func CreateUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Insert the user_contact struct into the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err = db.Exec("INSERT INTO user_contacts "+
 		"(user_id, contact_id) VALUES ($1, $2)",
 		user_contact.UserID, user_contact.ID)
@@ -64,7 +64,7 @@ func CreateUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(status_code)
 		return
 	}
-	db.Close()
+
 	log.Println("User contact created.")
 	status_code = models.StatusCode{StatusCode: 200, StatusCodeMessage: "User contact created."}
 	json.NewEncoder(w).Encode(status_code)
@@ -95,7 +95,7 @@ func ReadUserContactByUserIdAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Read data from the user_contacts table
-	rows, err := db_connection.GetDatabase().Query("SELECT * FROM user_contacts WHERE user_id = $1", user_contact.ID)
+	rows, err := db_connection.Database.Query("SELECT * FROM user_contacts WHERE user_id = $1", user_contact.ID)
 	if err != nil {
 		log.Printf("Error reading data from user_contacts table: %s", err)
 		status_code = models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading data from user_contacts table."}
@@ -115,7 +115,7 @@ func ReadUserContactByUserIdAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		user_contacts = append(user_contacts, user_contact)
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	log.Println("User contacts read.")
 	json.NewEncoder(w).Encode(user_contacts)
 }
@@ -150,7 +150,7 @@ func UpdateUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the user_contact struct in the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err = db.Exec("UPDATE user_contacts SET "+
 		"contact_name=$1, contact_email=$2 WHERE user_id=$3",
 		user_contact.ContactName, user_contact.ContactEmail, user_contact.UserID)
@@ -160,7 +160,7 @@ func UpdateUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(status_code)
 		return
 	}
-	db.Close()
+
 	log.Println("User contact updated.")
 	status_code = models.StatusCode{StatusCode: 200, StatusCodeMessage: "User contact updated."}
 	json.NewEncoder(w).Encode(status_code)
@@ -197,7 +197,7 @@ func DeleteUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Delete the user_contact struct from the database
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, err = db.Exec("DELETE FROM user_contacts WHERE user_id=$1 AND contact_id=$2",
 		user_contact.UserID, user_contact.ID)
 	if err != nil {
@@ -206,7 +206,7 @@ func DeleteUserContactAPI(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(status_code)
 		return
 	}
-	db.Close()
+
 	log.Println("User contact deleted.")
 	status_code = models.StatusCode{StatusCode: 200, StatusCodeMessage: "User contact deleted."}
 	json.NewEncoder(w).Encode(status_code)

@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq" // Import the PostgreSQL driver (required for database/sql)
 )
 
-var database *sql.DB
+var Database *sql.DB
 
 const (
 	// Host and port to connect to the PostgreSQL server
@@ -23,7 +23,7 @@ const (
 	db_name  = "psdb"
 )
 
-func GetDatabase() *sql.DB {
+func getDatabase() *sql.DB {
 	// Create Connection()
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		postgresqlHost, postgresqlPort, user, password, db_name)
@@ -49,7 +49,6 @@ func _CreateDataBaseIfNotExists() bool {
 		log.Printf("Error opening database connection: %s", err)
 		return false
 	}
-	defer db.Close()
 
 	// Check if the database already exists
 	var dbExists bool
@@ -84,7 +83,6 @@ func _CreateUserAndPasswordIfNotExists() bool {
 		log.Printf("Error opening database connection: %s", err)
 		return false
 	}
-	defer db.Close()
 
 	// Check if the user already exists
 	var userExists bool
@@ -112,17 +110,14 @@ func Init() error {
 	// Create channels for synchronization
 	var dbCreated bool
 	var userCreated bool
-	// dbCreated := make(chan bool)
-	// userCreated := make(chan bool)
-	// databaseConnected := make(chan bool)
-	// Create the database if it does not exist (goroutine)
+	// Create a database if it does not exist
 	respDb := _CreateDataBaseIfNotExists()
 	dbCreated = respDb
 	// Create a user and password if they do not exist (goroutine)
 	respUser := _CreateUserAndPasswordIfNotExists()
 	userCreated = respUser
 	// Database connection
-	database = GetDatabase()
+	Database = getDatabase()
 	// Create tables in the database
 	if dbCreated && userCreated {
 		terror := _CreateTables()
@@ -131,7 +126,7 @@ func Init() error {
 		}
 	}
 	// Close the database connection
-	defer database.Close()
+	// defer Database.Close()
 	return nil
 }
 
@@ -160,7 +155,7 @@ func _CreateTables() error {
             );`,
 		"projects": `
             CREATE TABLE IF NOT EXISTS projects (
-                id SERIAL PRIMARY KEY,
+				id SERIAL PRIMARY KEY,
                 project_name VARCHAR(100) NOT NULL,
                 description TEXT,
                 start_date DATE,
@@ -168,9 +163,8 @@ func _CreateTables() error {
 				tag_id INT NOT NULL,
                 project_lead_id INT NOT NULL,
 				image_path TEXT,
-				FOREIGN KEY (project_lead_id) REFERENCES users(id),
-				FOREIGN KEY (tag_id) REFERENCES project_tags(id)
-            );`,
+				FOREIGN KEY (project_lead_id) REFERENCES users(id)
+				);`,
 		"project_tags": ` 
 			CREATE TABLE IF NOT EXISTS project_tags (
 				id SERIAL PRIMARY KEY,
@@ -255,10 +249,10 @@ func _CreateTables() error {
 	done := make(chan bool)
 	log.Println("waiting for table creation...")
 	for _, tableName := range tableOrder {
-		_TableExists(tableName, database)
+		_TableExists(tableName, Database)
 		query, ok := createQueries[tableName]
 		go func(tName string, tQuery string) {
-			_, err := database.Exec(tQuery)
+			_, err := Database.Exec(tQuery)
 			if !ok {
 				log.Printf("Table %s not found in createQueries", tName)
 			}
@@ -273,11 +267,11 @@ func _CreateTables() error {
 	}
 	log.Println("Tables have been created successfully.")
 	// Insert data into the user_roles table
-	insertUserRoles(database)
+	insertUserRoles(Database)
 	// Insert data into the project_tags table
-	insertTag(database)
+	insertTag(Database)
 	// Insert data into the priority table
-	insertPriority(database)
+	insertPriority(Database)
 	return nil
 }
 
@@ -392,7 +386,7 @@ func InsertTaskStatus(db *sql.DB, projectID int, userID int) {
 	// If count is greater than zero, print a message indicating that the data already exists in the task_status table
 	if count > 0 {
 		log.Println("Data already exists in task_status table. Skipping insertion.")
-		db.Close()
+
 		return
 	}
 	// If the count is zero, insert the data into the task_status table

@@ -28,14 +28,14 @@ func CreateTaskAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	var task models.Task
 	// Decode the request body into a task struct
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Insert data into the tasks table
@@ -54,10 +54,10 @@ func CreateTaskAPI(w http.ResponseWriter, r *http.Request) {
 	if er != nil {
 		log.Printf("Error inserting data into tasks table: %s", er)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error creating task."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Task created."})
 }
 
@@ -80,7 +80,7 @@ func ReadTaskByProjectIDAndStatusIdAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Decode the request body into a project struct
 	newStruct := struct {
 		ProjectID int `json:"project_id"`
@@ -90,13 +90,13 @@ func ReadTaskByProjectIDAndStatusIdAPI(w http.ResponseWriter, r *http.Request) {
 	if er != nil {
 		log.Printf("Error decoding request body: %s", er)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Check if the project ID is 0
 	if newStruct.ProjectID == 0 && newStruct.StatusID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Project ID and Status ID not provided."})
-		db.Close()
+
 		return
 	}
 	// Read data from the tasks table
@@ -104,7 +104,7 @@ func ReadTaskByProjectIDAndStatusIdAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error reading data from tasks table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading tasks."})
-		db.Close()
+
 		return
 	}
 	var tasks []models.Task
@@ -120,11 +120,11 @@ func ReadTaskByProjectIDAndStatusIdAPI(w http.ResponseWriter, r *http.Request) {
 		if er != nil {
 			log.Printf("Error scanning data from tasks table: %s", er)
 			json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading tasks."})
-			db.Close()
+
 			return
 		}
 	}
-	db.Close()
+
 	json.NewEncoder(w).Encode(tasks)
 }
 
@@ -147,19 +147,19 @@ func UpdateTaskAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	var task models.Task
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if task.ID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Task ID not provided."})
-		db.Close()
+
 		return
 	}
 	// Decode the request body into a task struct
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Update data in the tasks table
@@ -180,10 +180,10 @@ func UpdateTaskAPI(w http.ResponseWriter, r *http.Request) {
 	if er != nil {
 		log.Printf("Error updating data in tasks table: %s", er)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error updating task."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Task updated."})
 }
 
@@ -206,19 +206,19 @@ func DeleteTaskAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Decode the request body into a task struct
 	var task models.Task
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if task.ID == 0 {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Task ID not provided."})
-		db.Close()
+
 		return
 	}
 	if err != nil {
 		log.Printf("Error decoding request body: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body."})
-		db.Close()
+
 		return
 	}
 	// Delete data from the tasks table
@@ -226,20 +226,19 @@ func DeleteTaskAPI(w http.ResponseWriter, r *http.Request) {
 	if er != nil {
 		log.Printf("Error deleting data from tasks table: %s", er)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error deleting task."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Task deleted."})
 }
 
 func DeleteTaskByProjectID(projectID int) {
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	_, er := db.Exec("DELETE FROM tasks WHERE project_id = $1", projectID)
 	if er != nil {
 		log.Printf("Error deleting data from tasks table: %s", er)
-		db.Close()
+
 	}
-	db.Close()
 
 }

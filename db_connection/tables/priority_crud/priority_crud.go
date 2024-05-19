@@ -29,8 +29,7 @@ func ReadPriorityAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Query the database to get the priority data
-	var priority *models.Priority
-	priority, er := readPriority()
+	priorityList, er := readPriority()
 	if er != nil {
 		log.Printf("Error getting priority data: %v", er)
 		// Return a response to the client indicating that there was an error getting the priority data
@@ -38,12 +37,13 @@ func ReadPriorityAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Return the priority data to the client
-	json.NewEncoder(w).Encode(priority)
+	json.NewEncoder(w).Encode(priorityList)
 }
 
 // ReadPriorityByID reads a priority by ID
-func readPriority() (*models.Priority, error) {
-	db := db_connection.GetDatabase()
+func readPriority() ([]models.Priority, error) {
+	db := db_connection.Database
+	var list []models.Priority
 	// Query the database to get the priority data
 	rows, err := db.Query("SELECT * FROM priority")
 	if err != nil {
@@ -54,10 +54,11 @@ func readPriority() (*models.Priority, error) {
 	var priority models.Priority
 	// Get the priority data
 	for rows.Next() {
-		err = rows.Scan(&priority.ID, &priority.PriorityName, &priority.PriorityDescription)
+		err = rows.Scan(&priority.ID, &priority.PriorityName, &priority.PriorityDescription, &priority.PriorityRGBColor)
 		if err != nil {
 			return nil, err
 		}
+		list = append(list, priority)
 	}
-	return &priority, nil
+	return list, nil
 }

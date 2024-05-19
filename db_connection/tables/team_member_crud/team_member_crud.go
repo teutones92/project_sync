@@ -41,7 +41,7 @@ func CreateTeamMemberAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Insert data into the team_members table
 	_, err = db.Exec(`
 		INSERT INTO team_members (
@@ -56,10 +56,10 @@ func CreateTeamMemberAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error inserting data into team_members table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error inserting data into team_members table."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	log.Println("Team member created.")
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Team member created."})
 }
@@ -97,12 +97,12 @@ func ReadTeamMembersAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	rows, err := db.Query("SELECT * FROM team_members WHERE project_id = $1 AND user_id = $2 AND role_id = $3", team_member_data.ProjectID, team_member_data.UserID, team_member_data.RoleID)
 	if err != nil {
 		log.Printf("Error reading data from team_members table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error reading data from team_members table."})
-		db.Close()
+
 		return
 	}
 	var team_members []models.TeamMember
@@ -112,12 +112,12 @@ func ReadTeamMembersAPI(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error scanning data from team_members table: %s", err)
 			json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error scanning data from team_members table."})
-			db.Close()
+
 			return
 		}
 		team_members = append(team_members, team_member)
 	}
-	db.Close()
+
 	log.Println("Team members read successfully.")
 	json.NewEncoder(w).Encode(team_members)
 }
@@ -155,7 +155,7 @@ func UpdateTeamMemberAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Update the team member
 	_, err = db.Exec(`
 		UPDATE team_members SET role_id = $1 WHERE project_id = $2 AND user_id = $3`,
@@ -166,10 +166,10 @@ func UpdateTeamMemberAPI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error updating data in team_members table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error updating data in team_members table."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	log.Println("Team member updated.")
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Team member updated."})
 }
@@ -206,16 +206,16 @@ func DeleteTeamMemberAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	// Delete the team member
 	_, err = db.Exec("DELETE FROM team_members WHERE project_id = $1 AND user_id = $2 AND role_id = $3", team_member_data.ProjectID, team_member_data.UserID, team_member_data.RoleID)
 	if err != nil {
 		log.Printf("Error deleting data from team_members table: %s", err)
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 500, StatusCodeMessage: "Error deleting data from team_members table."})
-		db.Close()
+
 		return
 	}
-	db.Close()
+
 	log.Println("Team member deleted.")
 	json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 200, StatusCodeMessage: "Team member deleted."})
 }

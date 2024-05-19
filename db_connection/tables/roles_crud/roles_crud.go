@@ -27,7 +27,7 @@ func ReadUserRoleAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Get the database connection
-	db := db_connection.GetDatabase()
+	db := db_connection.Database
 	rows, err := db.Query("SELECT * FROM roles")
 	if err != nil {
 		log.Printf("Error reading data from roles table: %s", err)
@@ -45,7 +45,7 @@ func ReadUserRoleAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		roles = append(roles, role)
 	}
-	db_connection.GetDatabase().Close()
+	db_connection.Database.Close()
 	log.Println("User roles read successfully.")
 	json.NewEncoder(w).Encode(roles)
 }

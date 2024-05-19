@@ -68,7 +68,7 @@ type Priority struct {
 	ID                  int    `json:"id"`
 	PriorityName        string `json:"priority_name"`
 	PriorityDescription string `json:"priority_description"`
-	PriorityColor       string `json:"priority_color"`
+	PriorityRGBColor    string `json:"priority_rgb_color"`
 }
 
 // Task represent the structure of a task
