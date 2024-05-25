@@ -4,34 +4,62 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
+	"time"
 
+	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver (required for database/sql)
 )
 
 var Database *sql.DB
 
-const (
+var (
 	// Host and port to connect to the PostgreSQL server
-	postgresqlHost = "localhost"
-	postgresqlPort = 5432
+	postgresqlHost string
+	postgresqlPort int
 	// Username and password to connect to the PostgreSQL server
-	serverUserName = "postgres"
-	serverPassword = "rfv/789*-+"
+	serverUserName string
+	serverPassword string
 	// Username and password to connect to the database
-	user     = "psadmin"
-	password = "Calibre92*"
-	db_name  = "psdb"
+	userDbAdmin string
+	passDbAdmin string
+	db_name     string
 )
 
+func LoadEnv() bool {
+	// Load the .env file
+	err := env.Load(".env")
+	if err != nil {
+		return false
+	}
+	postgresqlHost = os.Getenv("POSTGRESQL_HOST")
+	postgresqlPortString := os.Getenv("POSTGRESQL_PORT")
+	postgresqlPort, err = strconv.Atoi(postgresqlPortString)
+	if err != nil {
+		log.Panicf("Error converting port to integer: %v", err)
+		return false
+	}
+	serverUserName = os.Getenv("POSTGRESQL_USER")
+	serverPassword = os.Getenv("POSTGRESQL_PASSWORD")
+	userDbAdmin = os.Getenv("POSTGRESQL_USER_ADMIN")
+	passDbAdmin = os.Getenv("POSTGRESQL_PASSWORD_ADMIN")
+	db_name = os.Getenv("POSTGRESQL_DB_NAME")
+	return true
+}
+
 func getDatabase() *sql.DB {
+
 	// Create Connection()
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		postgresqlHost, postgresqlPort, user, password, db_name)
+		postgresqlHost, postgresqlPort, userDbAdmin, passDbAdmin, db_name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
-
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
 	// Verify the connection to the database
 	err = db.Ping()
 	if err != nil {
@@ -49,7 +77,7 @@ func _CreateDataBaseIfNotExists() bool {
 		log.Printf("Error opening database connection: %s", err)
 		return false
 	}
-
+	defer db.Close()
 	// Check if the database already exists
 	var dbExists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = 'psdb')").Scan(&dbExists)
@@ -57,7 +85,6 @@ func _CreateDataBaseIfNotExists() bool {
 		log.Printf("Error checking if database exists: %s", err)
 		return false
 	}
-
 	// If the database does not exist, create it
 	if !dbExists {
 		_, err := db.Exec("CREATE DATABASE psdb")
@@ -83,7 +110,6 @@ func _CreateUserAndPasswordIfNotExists() bool {
 		log.Printf("Error opening database connection: %s", err)
 		return false
 	}
-
 	// Check if the user already exists
 	var userExists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = 'psadmin')").Scan(&userExists)
@@ -91,7 +117,6 @@ func _CreateUserAndPasswordIfNotExists() bool {
 		log.Printf("Error checking if user exists: %s", err)
 		return false
 	}
-
 	// If the user does not exist, create it
 	if !userExists {
 		_, err := db.Exec("CREATE ROLE psadmin WITH LOGIN PASSWORD 'Calibre92*' SUPERUSER CREATEDB CREATEROLE;")
@@ -103,6 +128,7 @@ func _CreateUserAndPasswordIfNotExists() bool {
 	} else {
 		log.Println("Admin User already exists.")
 	}
+	db.Close()
 	return true
 }
 

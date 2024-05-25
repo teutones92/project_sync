@@ -115,7 +115,6 @@ func ReadUserContactByUserIdAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		user_contacts = append(user_contacts, user_contact)
 	}
-	db_connection.Database.Close()
 	log.Println("User contacts read.")
 	json.NewEncoder(w).Encode(user_contacts)
 }

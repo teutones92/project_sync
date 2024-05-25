@@ -45,7 +45,6 @@ func ReadUserRoleAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		roles = append(roles, role)
 	}
-	db_connection.Database.Close()
 	log.Println("User roles read successfully.")
 	json.NewEncoder(w).Encode(roles)
 }

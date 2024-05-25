@@ -52,7 +52,6 @@ func createProjectTag(project_tag_data models.ProjectTag) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error inserting data into project_tags table: project_tags %s", err))
 	}
-	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag created."}
 
 }
@@ -84,10 +83,34 @@ func ReadProjectTagAPI(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error decoding request body. Must provide project tag ID. as JSON object {\"id\": 1} or {\"id\": null} to get all default project tags."})
 		return
 	}
+	if project_tag.ID == 0 {
+		// Get all default project tags
+		project_tags, err := readProjectTag(0, 0)
+		if err != nil {
+			log.Printf("Error getting project tag data: %v", err)
+			// Return a response to the client indicating that there was an error getting the project tag data
+			json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error getting project tag data."})
+			return
+		}
+		// Return a response to the client with all default project tags
+		json.NewEncoder(w).Encode(project_tags)
+	}
+	if project_tag.ProjectID > 0 {
+		// Get a project tag
+		project_tag_data, er := readProjectTag(0, project_tag.ProjectID)
+		if er != nil {
+			log.Printf("Error getting project tag data: %v", er)
+			// Return a response to the client indicating that there was an error getting the project tag data
+			json.NewEncoder(w).Encode(&models.StatusCode{StatusCode: 400, StatusCodeMessage: "Error getting project tag data."})
+			return
+		}
+		// Return a response to the client with the project tag data
+		json.NewEncoder(w).Encode(project_tag_data)
+		return
+	}
 	// Query the database to get the project tag data
 	var new_project_tag *models.ProjectTag
-	new_project_tag, er := readProjectTagByID(project_tag.ID)
-
+	new_project_tag, er := readProjectTag(project_tag.ID, 0)
 	if er != nil {
 		log.Printf("Error getting project tag data: %v", er)
 		// Return a response to the client indicating that there was an error getting the project tag data
@@ -98,20 +121,46 @@ func ReadProjectTagAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 // readProjectTagByID reads a project tag by ID
-func readProjectTagByID(project_tag_id int) (*models.ProjectTag, error) {
+func readProjectTag(project_tag_id int, project_id int) (*models.ProjectTag, error) {
 	db := db_connection.Database
 	// Query the database to get the project tag data
-	rows, err := db.Query("SELECT * FROM project_tags WHERE id=$1", project_tag_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 	var project_tag models.ProjectTag
-	// Get the project tag data
-	for rows.Next() {
-		err = rows.Scan(&project_tag.ID, &project_tag.ProjectID, &project_tag.TagName)
+	if project_tag_id == 0 {
+		rows, err := db.Query("SELECT * FROM project_tags WHERE project_id=0")
 		if err != nil {
 			return nil, err
+		}
+		for rows.Next() {
+			err = rows.Scan(&project_tag.ID, &project_tag.ProjectID, &project_tag.TagName)
+			if err != nil {
+				return nil, err
+			}
+		}
+		defer rows.Close()
+	} else if project_id > 0 {
+		rows, err := db.Query("SELECT * FROM project_tags WHERE project_id=$1", project_tag_id)
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			err = rows.Scan(&project_tag.ID, &project_tag.ProjectID, &project_tag.TagName)
+			if err != nil {
+				return nil, err
+			}
+		}
+		defer rows.Close()
+	} else {
+		rows, err := db.Query("SELECT * FROM project_tags WHERE id=$1, project_id=$2", project_tag_id, project_id)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		// Get the project tag data
+		for rows.Next() {
+			err = rows.Scan(&project_tag.ID, &project_tag.ProjectID, &project_tag.TagName)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return &project_tag, nil
@@ -160,7 +209,6 @@ func readProjectTagByID(project_tag_id int) (*models.ProjectTag, error) {
 // 	if err != nil {
 // 		panic(fmt.Sprintf("Error updating data in project_tags table: project_tags %s", err))
 // 	}
-// 	db_connection.Database.Close()
 // 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag updated."}
 // }
 
@@ -204,6 +252,5 @@ func deleteProjectTag(project_tag_id int) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error deleting data from project_tags table: project_tags %s", err))
 	}
-	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "Project tag deleted."}
 }

@@ -19,7 +19,6 @@ func CreateUser(user_data models.User) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error inserting data into users table: users %s", err))
 	}
-	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User created."}
 
 }
@@ -108,7 +107,6 @@ func UpdateUser(user_data *models.User) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error updating user data: %s", err))
 	}
-	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User updated."}
 }
 
@@ -150,7 +148,6 @@ func DeleteUser(user_id int) models.StatusCode {
 	if err != nil {
 		panic(fmt.Sprintf("Error deleting user: %s", err))
 	}
-	db_connection.Database.Close()
 	return models.StatusCode{StatusCode: 200, StatusCodeMessage: "User deleted."}
 }
 
