@@ -1,4 +1,3 @@
-import 'package:project_sync/blocs/priority_bloc.dart';
 import 'package:project_sync/core/config/bloc_config.dart';
 import 'package:project_sync/core/extensions.dart';
 import 'package:flutter/material.dart';
@@ -25,13 +24,13 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          create: (context) => DarkModeBloc(),
+        ),
+        BlocProvider(
           create: (context) => LoginBloc(),
         ),
         BlocProvider(
           create: (context) => RegisterBloc(),
-        ),
-        BlocProvider(
-          create: (context) => DarkModeBloc(),
         ),
         BlocProvider(
           create: (context) => AuthSwapperBloc(),
@@ -53,6 +52,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => PriorityBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TagsBloc(),
         ),
       ],
       child: BlocBuilder<DarkModeBloc, ThemeMode>(

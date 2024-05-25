@@ -39,7 +39,7 @@ class RegisterBloc extends Bloc<RegisterBlocEvent, bool> {
           .showSnackBar(
             SnackBar(
               content: Text(value.statusCodeMessage),
-              duration: const Duration(seconds: 2),
+              duration: const Duration(milliseconds: 500),
             ),
           )
           .closed

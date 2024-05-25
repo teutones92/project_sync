@@ -1,11 +1,12 @@
 export 'package:flutter_bloc/flutter_bloc.dart';
 export '../../blocs/login_bloc.dart';
 export '../../blocs/dark_mode_bloc.dart';
-export '../../blocs/auth_swapper_bloc.dart';
+export '../../blocs/home_related_blocs/auth_swapper_bloc.dart';
 export '../../blocs/register_bloc.dart';
-export '../../blocs/home_bloc.dart';
+export '../../blocs/home_related_blocs/home_bloc.dart';
 export '../../blocs/user_data_bloc.dart';
-export '../../blocs/animate_side_menu_bloc.dart';
+export '../../blocs/home_related_blocs/animate_side_menu_bloc.dart';
 export '../../blocs/side_menu_bloc.dart';
-export '../../blocs/dashboard_analytic_bloc.dart';
+export '../../blocs/home_related_blocs/dashboard_analytic_bloc.dart';
 export '../../blocs/priority_bloc.dart';
+export '../../blocs/projects_related_blocs/tags_bloc.dart';
