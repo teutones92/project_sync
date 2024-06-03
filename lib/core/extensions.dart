@@ -46,7 +46,7 @@ extension ThemeX on ThemeData {
 
   static ThemeData of(BuildContext context) => Theme.of(context);
 
-  static const _goldColor = MaterialColor(0xFFFFD700, {
+  static const goldColor = MaterialColor(0xFFFFD700, {
     50: Color(0xFFFFF2D4),
     100: Color(0xFFFFE7AA),
     200: Color(0xFFFFD700),
@@ -61,11 +61,11 @@ extension ThemeX on ThemeData {
 
   static Gradient get goldGradient => LinearGradient(
         colors: [
-          _goldColor.shade200,
-          _goldColor.shade800,
-          _goldColor.shade900,
-          _goldColor.shade800,
-          _goldColor.shade200,
+          goldColor.shade200,
+          goldColor.shade800,
+          goldColor.shade900,
+          goldColor.shade800,
+          goldColor.shade200,
         ],
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
@@ -89,12 +89,12 @@ extension ThemeX on ThemeData {
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: _goldColor.shade800,
+            foregroundColor: goldColor.shade800,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor: _goldColor.shade800,
+            foregroundColor: goldColor.shade800,
             backgroundColor: darkBlueColor,
             elevation: 5,
           ),
@@ -104,13 +104,13 @@ extension ThemeX on ThemeData {
           textTheme: ButtonTextTheme.primary,
         ),
         textSelectionTheme: TextSelectionThemeData(
-          cursorColor: _goldColor.shade800,
-          selectionColor: _goldColor.shade800,
-          selectionHandleColor: _goldColor.shade800,
+          cursorColor: goldColor.shade800,
+          selectionColor: goldColor.shade800,
+          selectionHandleColor: goldColor.shade800,
         ),
         cardColor: Colors.white,
         hoverColor: const Color.fromARGB(33, 194, 194, 194),
-        focusColor: _goldColor.shade800,
+        focusColor: goldColor.shade800,
         scaffoldBackgroundColor: Colors.grey.shade100,
         shadowColor: Colors.black,
         appBarTheme: const AppBarTheme(
@@ -125,9 +125,9 @@ extension ThemeX on ThemeData {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: _goldColor).copyWith(
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: goldColor).copyWith(
           // surface: Colors.white,
-          outline: _goldColor.shade800,
+          outline: goldColor.shade800,
           brightness: Brightness.light,
         ),
       );
@@ -135,7 +135,7 @@ extension ThemeX on ThemeData {
   //** Dark theme for the app*/
 
   static ThemeData get darkTheme => ThemeData(
-        primarySwatch: _goldColor,
+        primarySwatch: goldColor,
         textTheme: GoogleFonts.lexendExaTextTheme().copyWith(
           titleLarge: GoogleFonts.lexend().copyWith(
             color: Colors.white,
@@ -181,12 +181,12 @@ extension ThemeX on ThemeData {
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: _goldColor.shade800,
+            foregroundColor: goldColor.shade800,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor: _goldColor.shade800,
+            foregroundColor: goldColor.shade800,
             elevation: 5,
             disabledBackgroundColor: Colors.grey.shade800,
           ),
@@ -198,12 +198,12 @@ extension ThemeX on ThemeData {
           ),
         ),
         textSelectionTheme: TextSelectionThemeData(
-          cursorColor: _goldColor.shade800,
-          selectionColor: _goldColor.shade800,
-          selectionHandleColor: _goldColor.shade800,
+          cursorColor: goldColor.shade800,
+          selectionColor: goldColor.shade800,
+          selectionHandleColor: goldColor.shade800,
         ),
-        cardColor: darkBlueColor,
-        scaffoldBackgroundColor: const Color.fromARGB(255, 10, 5, 0),
+        cardTheme: CardTheme(color: Colors.grey.shade800, elevation: 5),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 34, 37, 37),
         dialogBackgroundColor: darkBlueColor,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
@@ -212,18 +212,18 @@ extension ThemeX on ThemeData {
           iconTheme: IconThemeData(color: Colors.white),
           foregroundColor: Colors.white,
         ),
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: _goldColor).copyWith(
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: goldColor).copyWith(
           surface: darkBlueColor,
-          outline: _goldColor.shade800,
+          outline: goldColor.shade800,
           brightness: Brightness.dark,
         ),
         hintColor: Colors.grey.shade700,
         hoverColor: const Color.fromARGB(33, 194, 194, 194),
-        focusColor: _goldColor.shade800,
+        focusColor: goldColor.shade800,
         buttonTheme: ButtonThemeData(
-          buttonColor: _goldColor.shade800,
+          buttonColor: goldColor.shade800,
           textTheme: ButtonTextTheme.primary,
-          focusColor: _goldColor.shade800,
+          focusColor: goldColor.shade800,
         ),
       );
 }

@@ -13,31 +13,36 @@ class MenuButtonsWidget extends StatelessWidget {
       return Column(
         children: List.generate(SideMenuData.sideMenuData.length, (index) {
           final data = SideMenuData.sideMenuData[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Card(
-              elevation: data.selected ? 5 : 0,
-              color: data.selected
-                  ? ThemeX.goldGradient.colors[1]
-                  : Colors.transparent,
-              child: ListTile(
-                leading: Icon(
-                  data.icon,
-                  color: data.selected ? Colors.white : Colors.grey,
-                ),
-                title: Text(
-                  data.title,
-                  style: TextStyle(
-                      color: data.selected ? Colors.white : Colors.grey,
-                      fontWeight: FontWeight.bold),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                onTap: () => sideMenuBloc.onTap(index: index, context: context),
-              ),
-            ),
-          );
+          return BlocBuilder<SideMenuBloc, int?>(
+              bloc: sideMenuBloc,
+              builder: (context, state) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Card(
+                    elevation: state == index ? 5 : 0,
+                    color: state == index
+                        ? ThemeX.goldGradient.colors[1]
+                        : Colors.transparent,
+                    child: ListTile(
+                      leading: Icon(
+                        data.icon,
+                        color: state == index ? Colors.white : Colors.grey,
+                      ),
+                      title: Text(
+                        data.title,
+                        style: TextStyle(
+                            color: state == index ? Colors.white : Colors.grey,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onTap: () => sideMenuBloc.onTap(
+                          index: index, context: context, data: data),
+                    ),
+                  ),
+                );
+              });
         }),
       );
     });

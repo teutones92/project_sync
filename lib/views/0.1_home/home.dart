@@ -13,11 +13,24 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          NavigatorX.push(context: context, page: const CreateProject());
+      floatingActionButton: BlocBuilder<SideMenuBloc, int>(
+        builder: (context, state) {
+          return FloatingActionButton(
+            onPressed: () {
+              switch (state) {
+                case 0:
+                  NavigatorX.push(
+                      context: context, page: const CreateProject());
+                  break;
+                default:
+              }
+            },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: showIcon(state),
+            ),
+          );
         },
-        child: const Icon(Icons.add),
       ),
       body: Stack(
         children: [
@@ -46,5 +59,14 @@ class Home extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Icon showIcon(int state) {
+    switch (state) {
+      case 0:
+        return Icon(key: ValueKey<int>(state), Icons.add_card_rounded);
+      default:
+        return Icon(key: ValueKey<int>(state), Icons.add);
+    }
   }
 }

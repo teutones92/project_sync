@@ -3,7 +3,7 @@ import 'package:project_sync/models/repository/user_model/user_model.dart';
 import 'package:project_sync/services/user_service/user_service.dart';
 import 'package:flutter/material.dart';
 
-import '../core/config/bloc_config.dart';
+import '../../core/config/bloc_config.dart';
 
 class UserState extends UserModel {
   UserState({

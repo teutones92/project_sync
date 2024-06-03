@@ -1,4 +1,4 @@
-import 'package:project_sync/blocs/user_data_bloc.dart';
+import 'package:project_sync/blocs/users_related_blocs/user_data_bloc.dart';
 import 'package:project_sync/global/http_method/http_method.dart';
 import 'package:project_sync/models/repository/status_code_model/status_code_model.dart';
 import 'package:project_sync/models/repository/user_model/user_model.dart';

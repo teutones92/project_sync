@@ -67,7 +67,31 @@ class ProjectTeamMembers extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Show dialog to add new member
+                    showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                              title: const Text('Select members'),
+                              content: const Text(
+                                  'Select members to add to the project'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Accept'),
+                                ),
+                              ],
+                            ));
+                  },
+                  color: Colors.black,
                   icon: const Icon(Icons.add),
                 ),
               )

@@ -6,6 +6,7 @@ import 'package:project_sync/views/0.4_my_tasks/my_tasks.dart';
 import 'package:project_sync/views/0.3_teams/teams.dart';
 import 'package:project_sync/views/0.5_schedule/schedule.dart';
 import 'package:project_sync/views/0.6_messages/messages.dart';
+import 'package:project_sync/views/0.9_contacts/contacts.dart';
 
 class LandingWidget extends StatelessWidget {
   const LandingWidget({super.key});
@@ -39,6 +40,8 @@ class LandingWidget extends StatelessWidget {
 
   Widget returnBuildView(int index) {
     switch (index) {
+      case 0:
+        return const Dashboard();
       case 1:
         return const Teams();
       case 2:
@@ -47,6 +50,8 @@ class LandingWidget extends StatelessWidget {
         return const Schedule();
       case 4:
         return const Messages();
+      case 5:
+        return const Contacts();
       default:
         return const Dashboard();
     }

@@ -17,12 +17,54 @@ class ProjectPriority extends StatelessWidget {
           style: ThemeX.subtitleText,
         ),
         const SizedBox(height: 10),
-        BlocBuilder<PriorityBloc, List<PriorityModel>>(
-          builder: (context, state) {
-            context.read<PriorityBloc>().getPriorities(context);
-            return Container();
-          },
-        )
+        FutureBuilder(
+            future: context.read<PriorityBloc>().getPriorities(context),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return BlocBuilder<PriorityBloc, List<PriorityModel>>(
+                builder: (context, state) {
+                  return BlocBuilder<PrioritySelectedBloc, int?>(
+                    builder: (context, selectedState) {
+                      return Wrap(
+                        children: List.generate(state.length, (index) {
+                          final item = state[index];
+                          return Card(
+                            elevation: 8,
+                            child: InkWell(
+                              onTap: () {
+                                context
+                                    .read<PrioritySelectedBloc>()
+                                    .selectPriority(index, item);
+                              },
+                              child: Chip(
+                                backgroundColor: index == selectedState
+                                    ? ThemeX.goldColor.shade800
+                                    : ThemeX.of(context)
+                                        .scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                label: Text(
+                                  item.name,
+                                  style: TextStyle(
+                                    color: ThemeX.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.grey.shade800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      );
+                    },
+                  );
+                },
+              );
+            })
       ],
     );
   }

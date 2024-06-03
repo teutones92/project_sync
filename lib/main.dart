@@ -22,41 +22,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => DarkModeBloc(),
-        ),
-        BlocProvider(
-          create: (context) => LoginBloc(),
-        ),
-        BlocProvider(
-          create: (context) => RegisterBloc(),
-        ),
-        BlocProvider(
-          create: (context) => AuthSwapperBloc(),
-        ),
-        BlocProvider(
-          create: (context) => HomeBloc(),
-        ),
-        BlocProvider(
-          create: (context) => UserDataBloc(),
-        ),
-        BlocProvider(
-          create: (context) => AnimateSideMenuBloc(),
-        ),
-        BlocProvider(
-          create: (context) => SideMenuBloc(),
-        ),
-        BlocProvider(
-          create: (context) => DashboardAnalyticBloc(),
-        ),
-        BlocProvider(
-          create: (context) => PriorityBloc(),
-        ),
-        BlocProvider(
-          create: (context) => TagsBloc(),
-        ),
-      ],
+      providers: MultiBlocsProviderList.providers,
       child: BlocBuilder<DarkModeBloc, ThemeMode>(
         builder: (context, state) {
           return LayoutBuilder(

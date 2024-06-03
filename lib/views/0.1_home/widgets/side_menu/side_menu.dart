@@ -30,17 +30,14 @@ class SideMenu extends StatelessWidget {
                 ),
               ),
             ),
-            child: const Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: ListView(
+                children: const [
                   HeaderWidgetItems(shadows: true),
                   SizedBox(height: 70),
                   MenuButtonsWidget(),
-                  Spacer(),
+                  SizedBox(height: 10),
                   LogOutButton(),
                   SizedBox(height: 10),
                 ],
@@ -58,39 +55,32 @@ class LogOutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.logout_rounded,
-          color: Colors.grey,
-        ),
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.grey.withOpacity(0.7),
-          ),
-          onPressed: () => showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: const Text("Logout"),
-              content: const Text("Are you sure you want to logout?"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () => context.read<HomeBloc>().logOut(context),
-                  child: const Text("Logout"),
-                ),
-              ],
+    return ListTile(
+      leading: const Icon(
+        Icons.logout_rounded,
+        color: Colors.grey,
+      ),
+      onTap: () => showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel"),
             ),
-          ),
-          child: const Text(
-            "Logout",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
+            TextButton(
+              onPressed: () => context.read<HomeBloc>().logOut(context),
+              child: const Text("Logout"),
+            ),
+          ],
         ),
-      ],
+      ),
+      title: const Text(
+        "Logout",
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+      ),
     );
   }
 }
