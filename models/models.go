@@ -59,7 +59,7 @@ type Project struct {
 // ProjectTag represent the structure of a project tag
 type ProjectTag struct {
 	ID        int    `json:"id"`
-	ProjectID int    `json:"project_id"`
+	ProjectID *int   `json:"project_id"`
 	TagName   string `json:"tag_name"`
 }
 

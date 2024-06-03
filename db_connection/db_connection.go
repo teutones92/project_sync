@@ -267,6 +267,9 @@ func _CreateTables() error {
 				user_id INT,
 				contact_name VARCHAR(100) NOT NULL,
 				contact_email VARCHAR(100) NOT NULL,
+				contact_phone VARCHAR(20) NOT NULL,
+				contact_avatar_path TEXT NOT NULL DEFAULT '',
+				date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 				FOREIGN KEY (user_id) REFERENCES users(id)
 			);`,
 	}
