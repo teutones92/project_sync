@@ -15,16 +15,20 @@ import (
 var Database *sql.DB
 
 var (
-	// Host and port to connect to the PostgreSQL server
+	// Host to connect to the PostgreSQL server
 	postgresqlHost string
+	// Port to connect to the PostgreSQL server
 	postgresqlPort int
 	// Username and password to connect to the PostgreSQL server
 	serverUserName string
+	// Password to connect to the PostgreSQL server
 	serverPassword string
 	// Username and password to connect to the database
 	userDbAdmin string
+	// Password to connect to the database
 	passDbAdmin string
-	db_name     string
+	// Name of the database
+	db_name string
 )
 
 func LoadEnv() bool {
