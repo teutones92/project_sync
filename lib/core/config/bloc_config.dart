@@ -13,6 +13,7 @@ export '../../blocs/home_related_blocs/dashboard_analytic_bloc.dart';
 export '../../blocs/create_project_related_blocs/priority_bloc.dart';
 export '../../blocs/create_project_related_blocs/tags_bloc.dart';
 export '../../blocs/users_related_blocs/project_lead_bloc.dart';
+export '../../blocs/create_project_related_blocs/team_selection_bloc.dart';
 
 class MultiBlocsProviderList {
   static get providers => [
@@ -57,6 +58,9 @@ class MultiBlocsProviderList {
         ),
         BlocProvider(
           create: (context) => PrioritySelectedBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TeamSelectionBloc(),
         ),
       ];
 }

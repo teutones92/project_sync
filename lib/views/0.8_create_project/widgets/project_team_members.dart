@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project_sync/core/config/bloc_config.dart';
 import 'package:project_sync/core/extensions.dart';
+import 'package:project_sync/views/0.9_contacts/widgets/contacts_body.dart';
 
 class ProjectTeamMembers extends StatelessWidget {
   const ProjectTeamMembers({super.key});
@@ -69,27 +71,39 @@ class ProjectTeamMembers extends StatelessWidget {
                 child: IconButton(
                   onPressed: () {
                     // Show dialog to add new member
+                    final teamSelectBloc = context.read<TeamSelectionBloc>();
                     showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              title: const Text('Select members'),
-                              content: const Text(
-                                  'Select members to add to the project'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('Accept'),
-                                ),
-                              ],
-                            ));
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Select members'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Select members to add to the project'),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 2,
+                              height: MediaQuery.of(context).size.height / 2,
+                              child: const ContactsBody(count: 2, onTap: true),
+                            )
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              teamSelectBloc.resetTeamSelection();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Accept'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   color: Colors.black,
                   icon: const Icon(Icons.add),

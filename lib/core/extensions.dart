@@ -71,7 +71,7 @@ extension ThemeX on ThemeData {
         end: Alignment.centerRight,
       );
 
-  static const Color darkBlueColor = Color.fromARGB(255, 4, 1, 24);
+  static const Color darkBlueColor = Color(0xFF040118);
 
   //** Light theme for the app*/
 

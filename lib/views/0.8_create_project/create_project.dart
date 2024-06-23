@@ -49,7 +49,9 @@ class CreateProject extends StatelessWidget {
                         child: BlocBuilder<ProjectLeadBloc, UserState?>(
                           builder: (context, state) {
                             return Text(
-                              'Project Lead: ${state!.username}',
+                              state != null
+                                  ? 'Project Lead: ${state.username}'
+                                  : 'Project Lead: You',
                             );
                           },
                         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:project_sync/core/extensions.dart';
 import 'package:project_sync/views/0.1_home/widgets/landing/landing.dart';
 import 'package:project_sync/views/0.8_create_project/create_project.dart';
+import '../0.8.1_create_contact/create_contact.dart';
 import 'widgets/home_header/home_header.dart';
 import 'widgets/side_menu/side_menu.dart';
 import 'widgets/toggle_menu_button/toggle_menu_button.dart';
@@ -21,6 +22,10 @@ class Home extends StatelessWidget {
                 case 0:
                   NavigatorX.push(
                       context: context, page: const CreateProject());
+                  break;
+                case 5:
+                  NavigatorX.push(
+                      page: const CreateContact(), context: context);
                   break;
                 default:
               }
@@ -65,6 +70,8 @@ class Home extends StatelessWidget {
     switch (state) {
       case 0:
         return Icon(key: ValueKey<int>(state), Icons.add_card_rounded);
+      case 5:
+        return Icon(key: ValueKey<int>(state), Icons.person_add);
       default:
         return Icon(key: ValueKey<int>(state), Icons.add);
     }
