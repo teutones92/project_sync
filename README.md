@@ -37,17 +37,17 @@ Este repositorio contiene un sistema de gestión de proyectos completo con un fr
     cd tu_repositorio/backend
     ```
 
-2. Configura las variables de conexión a la base de datos en el archivo `db_connection/config.go`:
+2. Configura las variables de conexión a la base de datos en el archivo `/.env`:
 
     ```go
     const (
         postgresqlHost = "localhost"
         postgresqlPort = 5432
         serverUserName = "postgres"
-        serverPassword = "rfv/789*-+"
-        user           = "psadmin"
-        password       = "Calibre92*"
-        db_name        = "psdb"
+        serverPassword = "'....'"
+        adminUser      = "...."
+        adminPassword  = "...."
+        db_name        = "...."
     )
     ```
 
