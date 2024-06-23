@@ -109,7 +109,7 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para má
 
 ## Contacto
 
-Si tienes alguna pregunta o sugerencia, no dudes en contactarme a través de [tu_email@example.com].
+Si tienes alguna pregunta o sugerencia, no dudes en contactarme a través de [teutones92@gmail.com].
 
 ---
 
