@@ -114,3 +114,12 @@ Si tienes alguna pregunta o sugerencia, no dudes en contactarme a través de [tu
 ---
 
 ¡Gracias por usar nuestro sistema de gestión de proyectos!
+
+
+
+
+
+
+Auth Frontend Image
+![imagen](https://github.com/teutones92/project_sync/assets/72642474/7c4ea8e2-c31b-4a25-9a35-6714c70fd310)
+
