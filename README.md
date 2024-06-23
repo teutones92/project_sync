@@ -45,7 +45,7 @@ Este repositorio contiene un sistema de gestión de proyectos completo con un fr
         postgresqlPort = 5432
         serverUserName = "postgres"
         serverPassword = "'....'"
-        adminUser      = "...."
+        adminUser      = "psadmin"
         adminPassword  = "...."
         db_name        = "...."
    
