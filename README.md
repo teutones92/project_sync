@@ -121,6 +121,12 @@ Si tienes alguna pregunta o sugerencia, no dudes en contactarme a través de [tu
 
 
 Auth Frontend Image
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/551b251b-4626-4d84-87c2-c153dee28b63)
+![imagen](https://github.com/teutones92/project_sync/assets/72642474/f1620888-72cd-4468-ade4-368c7d1d572d)
+![imagen](https://github.com/teutones92/project_sync/assets/72642474/d1f3886c-3956-424e-be9a-6c9a86377493)
+![imagen](https://github.com/teutones92/project_sync/assets/72642474/c4b0c3e7-9e75-464c-853e-e9a0c8c0f479)
+
+
+
+
 
 
