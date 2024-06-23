@@ -41,13 +41,13 @@ Este repositorio contiene un sistema de gestión de proyectos completo con un fr
 
     
    
-POSTGRESQL_HOST = "localhost"
-POSTGRESQL_PORT = 5432
-POSTGRESQL_USER = "postgres"
-POSTGRESQL_PASSWORD = "rfv/789*-+"
-POSTGRESQL_USER_ADMIN = "psadmin"
-POSTGRESQL_PASSWORD_ADMIN = "....."
-POSTGRESQL_DB_NAME     = "psdb"
+        POSTGRESQL_HOST = "localhost"
+        POSTGRESQL_PORT = 5432
+        POSTGRESQL_USER = "postgres"
+        POSTGRESQL_PASSWORD = "rfv/789*-+"
+        POSTGRESQL_USER_ADMIN = "psadmin"
+        POSTGRESQL_PASSWORD_ADMIN = "....."
+        POSTGRESQL_DB_NAME     = "psdb"
    
 
 3. Inicia el servidor backend:
