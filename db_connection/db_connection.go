@@ -107,9 +107,7 @@ func _CreateDataBaseIfNotExists() bool {
 
 // Function to create a user and password in postgresql server if they do not exist
 func _CreateUserAndPasswordIfNotExists() bool {
-	var username string = "postgres"
-	var password string = "rfv/789*-+"
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", postgresqlHost, postgresqlPort, username, password)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", postgresqlHost, postgresqlPort, serverUserName, serverPassword)
 	// Connect to PostgreSQL server
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -118,14 +116,16 @@ func _CreateUserAndPasswordIfNotExists() bool {
 	}
 	// Check if the user already exists
 	var userExists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = 'psadmin')").Scan(&userExists)
+	var user_query = fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = '%s')", userDbAdmin)
+	err = db.QueryRow(user_query).Scan(&userExists)
 	if err != nil {
 		log.Printf("Error checking if user exists: %s", err)
 		return false
 	}
 	// If the user does not exist, create it
 	if !userExists {
-		_, err := db.Exec("CREATE ROLE psadmin WITH LOGIN PASSWORD 'Calibre92*' SUPERUSER CREATEDB CREATEROLE;")
+		var create_user_admin_query = fmt.Sprintf("CREATE ROLE %s WITH LOGIN PASSWORD '%s' SUPERUSER CREATEDB CREATEROLE;", userDbAdmin, passDbAdmin)
+		_, err := db.Exec(create_user_admin_query)
 		if err != nil {
 			log.Printf("Error creating user: %s", err)
 			return false
