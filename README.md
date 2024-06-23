@@ -129,7 +129,8 @@ Auth Frontend Image
 
 ![imagen](https://github.com/teutones92/project_sync/assets/72642474/f9fe6502-24cf-499b-af7b-8fddd1ed6477)
 
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/e02278fb-8f2b-4f75-a206-b80930887aff)
+![imagen](https://github.com/teutones92/project_sync/assets/72642474/6410783e-74c0-4951-bdfe-44a7f58d3794)
+
 
 
 
