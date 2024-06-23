@@ -39,8 +39,8 @@ Este repositorio contiene un sistema de gestión de proyectos completo con un fr
 
 2. Configura las variables de conexión a la base de datos en el archivo `/.env`:
 
-    ```go
-    const (
+    
+   
         postgresqlHost = "localhost"
         postgresqlPort = 5432
         serverUserName = "postgres"
@@ -48,8 +48,7 @@ Este repositorio contiene un sistema de gestión de proyectos completo con un fr
         adminUser      = "...."
         adminPassword  = "...."
         db_name        = "...."
-    )
-    ```
+   
 
 3. Inicia el servidor backend:
 
