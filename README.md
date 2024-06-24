@@ -1,140 +1,126 @@
 # Project Management System
 
-Este repositorio contiene un sistema de gestión de proyectos completo con un frontend desarrollado en Flutter y un backend en Go. El sistema permite la creación y gestión de proyectos, tareas, usuarios y roles, así como la asignación de tareas y comentarios.
+This repository contains a comprehensive project management system with a frontend developed in Flutter and a backend in Go. The system allows the creation and management of projects, tasks, users, and roles, as well as task assignments and comments.
 
-## Estructura del Proyecto
+## Project Structure
 
-- `frontend/` - Contiene el código fuente del frontend desarrollado en Flutter.
-- `backend/` - Contiene el código fuente del backend desarrollado en Go.
+- `frontend/` - Contains the source code of the frontend developed in Flutter.
+- `backend/` - Contains the source code of the backend developed in Go.
 
-## Tecnologías Utilizadas
+## Technologies Used
 
 - **Frontend:** Flutter
 - **Backend:** Go (Golang)
-- **Base de Datos:** PostgreSQL
+- **Database:** PostgreSQL
 
-## Características
+## Features
 
-- Gestión de usuarios y roles.
-- Creación y gestión de proyectos y tareas.
-- Asignación de tareas a usuarios.
-- Comentarios en tareas.
-- Sistema de autenticación y sesiones.
-- Configuración de prioridades y estados de las tareas.
+- User and role management.
+- Project and task creation and management.
+- Task assignment to users.
+- Task comments.
+- Authentication and session system.
+- Task priority and status settings.
 
-## Requisitos Previos
+## Prerequisites
 
-- Go (v1.16 o superior)
-- Flutter (v2.0 o superior)
+- Go (v1.16 or higher)
+- Flutter (v2.0 or higher)
 - PostgreSQL
 
-## Configuración del Backend
+## Backend Configuration
 
-1. Clona el repositorio:
+1. Clone the repository:
 
     ```bash
-    git clone https://github.com/tu_usuario/tu_repositorio.git
-    cd tu_repositorio/backend
+    git clone (https://github.com/teutones92/project_sync.git) brand frontend and backend
+    cd your_repository/backend
     ```
 
-2. Configura las variables de conexión a la base de datos en el archivo `/.env`:
+2. Configure the database connection variables in the `/.env` file:
 
-    
-   
-        POSTGRESQL_HOST = "localhost"
-        POSTGRESQL_PORT = 5432
-        POSTGRESQL_USER = "postgres"
-        POSTGRESQL_PASSWORD = "postgres_pass"
-        POSTGRESQL_USER_ADMIN = "psadmin"
-        POSTGRESQL_PASSWORD_ADMIN = "....."
-        POSTGRESQL_DB_NAME     = "psdb"
-   
+    ```plaintext
+    POSTGRESQL_HOST = "localhost"
+    POSTGRESQL_PORT = 5432
+    POSTGRESQL_USER = "postgres"
+    POSTGRESQL_PASSWORD = "postgres_pass"
+    POSTGRESQL_USER_ADMIN = "psadmin"
+    POSTGRESQL_PASSWORD_ADMIN = "....."
+    POSTGRESQL_DB_NAME = "psdb"
+    ```
 
-3. Inicia el servidor backend:
+3. Start the backend server:
 
     ```bash
     go run main.go
     ```
 
-## Configuración del Frontend
+## Frontend Configuration
 
-1. Ve al directorio del frontend:
+1. Go to the frontend directory:
 
     ```bash
     cd ../frontend
     ```
 
-2. Instala las dependencias de Flutter:
+2. Install Flutter dependencies:
 
     ```bash
     flutter pub get
     ```
 
-3. Configura la URL del backend en tu archivo de configuración de Flutter (por ejemplo, `lib/config.dart`):
+3. Configure the backend URL in your Flutter configuration file (e.g., `lib/config.dart`):
 
     ```dart
     const String backendUrl = 'http://localhost:8080';
     ```
 
-4. Ejecuta la aplicación Flutter:
+4. Run the Flutter application:
 
     ```bash
     flutter run
     ```
 
-## Base de Datos
+## Database
 
-Asegúrate de tener PostgreSQL instalado y en ejecución. Puedes crear la base de datos y los usuarios necesarios utilizando las funciones del backend:
+Make sure you have PostgreSQL installed and running. You can create the necessary database and users using the backend functions:
 
 - `_CreateDataBaseIfNotExists()`
 - `_CreateUserAndPasswordIfNotExists()`
 
-## Scripts de Inicialización
+## Initialization Scripts
 
-El backend incluye scripts para la creación automática de tablas y la inserción de datos iniciales. Estos scripts se ejecutan automáticamente al iniciar el servidor backend.
+The backend includes scripts for automatic table creation and initial data insertion. These scripts run automatically when the backend server starts.
 
-## Contribuir
+## Contributing
 
-Si deseas contribuir a este proyecto, por favor sigue estos pasos:
+If you want to contribute to this project, please follow these steps:
 
-1. Haz un fork del repositorio.
-2. Crea una nueva rama (`git checkout -b feature/nueva_caracteristica`).
-3. Realiza tus cambios y haz commit (`git commit -am 'Agrega nueva característica'`).
-4. Sube tus cambios (`git push origin feature/nueva_caracteristica`).
-5. Abre un Pull Request.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/new_feature`).
+3. Make your changes and commit (`git commit -am 'Add new feature'`).
+4. Push your changes (`git push origin feature/new_feature`).
+5. Open a Pull Request.
 
-## Licencia
+## License
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+This project is under the MIT License. See the `LICENSE` file for more details.
 
-## Contacto
+## Contact
 
-Si tienes alguna pregunta o sugerencia, no dudes en contactarme a través de [teutones92@gmail.com].
+If you have any questions or suggestions, feel free to contact me at [teutones92@gmail.com].
 
 ---
 
-¡Gracias por usar nuestro sistema de gestión de proyectos!
-
-
-
-
-
+Thank you for using our project management system!
 
 Auth Frontend Image
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/f1620888-72cd-4468-ade4-368c7d1d572d)
+![image](https://github.com/teutones92/project_sync/assets/72642474/f1620888-72cd-4468-ade4-368c7d1d572d)
 
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/d1f3886c-3956-424e-be9a-6c9a86377493)
+![image](https://github.com/teutones92/project_sync/assets/72642474/d1f3886c-3956-424e-be9a-6c9a86377493)
 
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/c4b0c3e7-9e75-464c-853e-e9a0c8c0f479)
+![image](https://github.com/teutones92/project_sync/assets/72642474/c4b0c3e7-9e75-464c-853e-e9a0c8c0f479)
 
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/f9fe6502-24cf-499b-af7b-8fddd1ed6477)
+![image](https://github.com/teutones92/project_sync/assets/72642474/f9fe6502-24cf-499b-af7b-8fddd1ed6477)
 
-![imagen](https://github.com/teutones92/project_sync/assets/72642474/6410783e-74c0-4951-bdfe-44a7f58d3794)
-
-
-
-
-
-
-
-
+![image](https://github.com/teutones92/project_sync/assets/72642474/6410783e-74c0-4951-bdfe-44a7f58d3794)
