@@ -1,7 +1,9 @@
+import 'package:project_sync/core/extensions.dart';
 import 'package:project_sync/models/repository/status_code_model/status_code_model.dart';
 import 'package:project_sync/models/repository/user_model/user_model.dart';
 import 'package:project_sync/services/user_service/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:project_sync/views/0.0_authentication/authentication.dart';
 
 import '../../core/config/bloc_config.dart';
 
@@ -27,31 +29,37 @@ class UserDataBloc extends Cubit<UserState?> {
 
   Future<void> getUserData(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
-    final resp = await UserService.readUserData();
-    if (resp is UserModel) {
-      emit(UserState(
-        id: resp.id,
-        username: resp.username,
-        email: resp.email,
-        dob: resp.dob,
-        phoneNumber: resp.phoneNumber,
-        countryCode: resp.countryCode,
-        countryPhoneCode: resp.countryPhoneCode,
-        langCode: resp.langCode,
-        passwordHash: resp.passwordHash,
-        password: resp.password,
-        userAvatarPath: resp.userAvatarPath,
-        darkMode: resp.darkMode,
-      ));
-      return;
-    }
-    if (resp is StatusCodeModel) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(resp.statusCodeMessage),
-        ),
-      );
-    }
+    await UserService.readUserData().then((resp) {
+      if (resp is UserModel) {
+        emit(UserState(
+          id: resp.id,
+          username: resp.username,
+          email: resp.email,
+          dob: resp.dob,
+          phoneNumber: resp.phoneNumber,
+          countryCode: resp.countryCode,
+          countryPhoneCode: resp.countryPhoneCode,
+          langCode: resp.langCode,
+          passwordHash: resp.passwordHash,
+          password: resp.password,
+          userAvatarPath: resp.userAvatarPath,
+          darkMode: resp.darkMode,
+        ));
+        return;
+      }
+      if (resp is StatusCodeModel) {
+        if (resp.statusCode == 401) {
+          NavigatorX.pushAndRemoveUntil(
+              context: context, page: const Authentication());
+          return;
+        }
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(resp.statusCodeMessage),
+          ),
+        );
+      }
+    });
   }
 
   void updateDarkModeUserData(
